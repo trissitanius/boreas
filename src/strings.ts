@@ -30,4 +30,34 @@ export const strings = {
   invalidWeight: 'Enter a weight, e.g. 22.5',
   invalidReps: 'Enter whole reps, e.g. 10',
   saveFailed: 'Could not save. Try again.',
+
+  // Welcome page (the website)
+  landing: {
+    eyebrow: 'Workout tracker',
+    titleLines: ['Every set', 'remembered.'],
+    lead: 'Boreas shows what you lifted last time on every exercise, whichever day you did it.',
+    install: 'Install app',
+    installed: 'Installed. Open Boreas from your home screen.',
+    note: 'Free. No account. Your workouts stay on your phone.',
+    tryInBrowser: 'Try it in the browser',
+  },
+
+  // Install guide (iPhone and other browsers)
+  installGuide: {
+    close: 'Close',
+    iosTitle: 'Add Boreas to your Home Screen',
+    iosSteps: [
+      'Tap the Share button in the browser bar.',
+      'Scroll down and tap “Add to Home Screen”.',
+      'Tap “Add”. Boreas now opens from its icon, full screen.',
+    ],
+    iosNote: 'Don’t see “Add to Home Screen”? Open this page in Safari.',
+    manualTitle: 'Install Boreas',
+    manualSteps: [
+      'Open your browser’s menu (⋮ or ⋯).',
+      'Tap “Install app” or “Add to Home screen”.',
+      'Open Boreas from its new icon.',
+    ],
+    manualNote: 'On iPhone, use Safari’s Share button instead.',
+  },
 }
