@@ -1304,3 +1304,190 @@ section > .last-time {
     transition: none;
   }
 }
+
+/* ---------- Muscle map ---------- */
+:root {
+  --body-base: #262e45;
+  --body-other: #343d58;
+  --body-outline: rgb(var(--frozen-rgb) / 0.35);
+}
+
+.muscle-panel {
+  margin-top: 22px;
+  padding: 14px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-strong);
+}
+
+.body-maps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  min-height: 220px;
+}
+
+.body-map {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The component draws at a fixed size; let it scale with the screen instead. */
+.body-map svg {
+  width: 100%;
+  max-width: 190px;
+  height: auto;
+  max-height: 340px;
+}
+
+.body-maps.is-editing .body-map svg {
+  max-height: 420px;
+  touch-action: manipulation;
+}
+
+.body-map figcaption {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.muscle-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.muscle-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--soft);
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-dot.is-secondary {
+  margin-left: 8px;
+}
+
+.legend-dot.is-primary,
+.brush-primary .brush-swatch {
+  background: var(--ember);
+}
+
+.legend-dot.is-secondary,
+.brush-secondary .brush-swatch {
+  background: var(--frozen);
+}
+
+/* Brushes */
+.brushes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.brush {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.brush[aria-checked='true'] {
+  border-color: var(--text);
+  outline: 2px solid var(--text);
+  outline-offset: -1px;
+}
+
+.brush-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.brush-erase .brush-swatch {
+  border: 2px dashed var(--soft);
+}
+
+.muscle-editor .body-maps {
+  margin: 10px 0 6px;
+}
+
+.part-chooser,
+.off-map {
+  margin: 10px 0;
+}
+
+.muscle-chip.is-primary {
+  background: var(--ember);
+  border-color: var(--ember);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+.muscle-chip.is-secondary {
+  background: var(--frozen);
+  border-color: var(--frozen);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+.muscle-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 12px 0;
+  font-size: 0.95rem;
+}
+
+.muscle-summary dt {
+  font-weight: 700;
+}
+
+.muscle-summary dt.is-primary {
+  color: var(--ember);
+}
+
+.muscle-summary dt.is-secondary {
+  color: var(--frozen);
+}
+
+.muscle-summary dd {
+  margin: 0;
+}
+
+.body-model-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.body-model-switch .form-label {
+  margin: 0 4px 0 0;
+}
+
+.body-model-switch .chip[aria-checked='true'] {
+  background: var(--soft);
+  border-color: var(--soft);
+  color: var(--bg);
+  font-weight: 700;
+}

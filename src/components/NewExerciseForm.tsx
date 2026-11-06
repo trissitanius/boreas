@@ -6,7 +6,7 @@ import type { LoadType, Machine } from '../db/types'
 import { brandForGymNumber } from '../lib/machines'
 import { parseWeight } from '../lib/parse'
 import { strings } from '../strings'
-import { MuscleChips } from './MuscleChips'
+import { MuscleEditor } from './MuscleEditor'
 
 interface Props {
   machines: Machine[]
@@ -157,15 +157,16 @@ export function NewExerciseForm({ machines, onCreated, onBack }: Props) {
         </div>
       </fieldset>
 
-      <MuscleChips
-        label={t.primary}
-        selected={primary}
-        onChange={(muscles) => {
-          setPrimary(muscles)
-          setSecondary((s) => s.filter((m) => !muscles.includes(m)))
-        }}
-      />
-      <MuscleChips label={t.secondary} selected={secondary} onChange={setSecondary} disabled={primary} />
+      <fieldset className="form-field chips-field">
+        <legend className="form-label">{t.muscles}</legend>
+        <MuscleEditor
+          value={{ primary, secondary }}
+          onChange={(next) => {
+            setPrimary(next.primary)
+            setSecondary(next.secondary)
+          }}
+        />
+      </fieldset>
 
       <div className="form-field">
         <label htmlFor="ne-settings">{strings.editor.settings}</label>

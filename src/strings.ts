@@ -105,13 +105,12 @@ export const strings = {
     model: 'Model (optional)',
     modelPlaceholder: 'e.g. Nitro Evo Leg Extension',
     loadType: 'Load',
-    primary: 'Primary muscles',
-    secondary: 'Secondary muscles (optional)',
+    muscles: 'Muscles',
     cues: 'Cues (optional, separate with commas)',
     create: 'Add exercise',
     back: '‹ Back to list',
     needName: 'Give the exercise a name.',
-    needPrimary: 'Pick at least one primary muscle.',
+    needPrimary: 'Paint at least one primary muscle (Ember).',
     needGymNumber: 'Enter the machine’s gym number.',
     needBrand: 'Enter the machine’s brand.',
     duplicateMachine: (n: string) => `Machine ${n} already exists. Pick it from the list.`,
@@ -146,6 +145,27 @@ export const strings = {
     abductors: 'Abductors',
     calves: 'Calves',
   } satisfies Record<Muscle, string>,
+
+  // Muscle map
+  muscleMap: {
+    label: (primary: string, secondary: string) => `Primary: ${primary}. Secondary: ${secondary}.`,
+    primary: 'Primary',
+    secondary: 'Secondary',
+    erase: 'Erase',
+    editMuscles: 'Edit muscles',
+    title: (name: string) => `Muscles: ${name}`,
+    hint: 'Pick a brush, then tap muscles on the body.',
+    whichPart: 'Which part?',
+    done: 'Done',
+    offMap: 'Not on the map',
+    front: 'Front',
+    back: 'Back',
+    male: 'Male',
+    female: 'Female',
+    bodyModel: 'Body',
+    none: '—',
+    needPrimary: 'Paint at least one primary muscle (Ember).',
+  },
 
   // Backup
   backup: {

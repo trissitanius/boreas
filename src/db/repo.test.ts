@@ -362,3 +362,27 @@ describe('createExercise', () => {
     expect(await db.exercises.count()).toBe(18)
   })
 })
+
+describe('updateExercise muscles (muscle map)', () => {
+  it('saves new primary and secondary muscles, keeping history', async () => {
+    await logThree('ex-y-raise', 'day-tue', WED, [[8, 12], [8, 11], [8, 10]])
+    await updateExercise(db, 'ex-y-raise', { primaryMuscles: ['side-delts'], secondaryMuscles: ['rear-delts', 'traps'] })
+    const ex = (await db.exercises.get('ex-y-raise'))!
+    expect(ex.primaryMuscles).toEqual(['side-delts'])
+    expect(ex.secondaryMuscles).toEqual(['rear-delts', 'traps'])
+    expect(await db.setLogs.count()).toBe(3)
+  })
+
+  it('cleans a muscle given as both primary and secondary', async () => {
+    await updateExercise(db, 'ex-chest-press', { primaryMuscles: ['chest', 'chest'], secondaryMuscles: ['chest', 'triceps'] })
+    const ex = (await db.exercises.get('ex-chest-press'))!
+    expect(ex.primaryMuscles).toEqual(['chest'])
+    expect(ex.secondaryMuscles).toEqual(['triceps'])
+  })
+
+  it('refuses no primary muscle or unknown muscles, and changes nothing', async () => {
+    await expect(updateExercise(db, 'ex-chest-press', { primaryMuscles: [], secondaryMuscles: ['triceps'] })).rejects.toThrow()
+    await expect(updateExercise(db, 'ex-chest-press', { primaryMuscles: ['wings' as never], secondaryMuscles: [] })).rejects.toThrow()
+    expect((await db.exercises.get('ex-chest-press'))!.primaryMuscles).toEqual(['chest'])
+  })
+})

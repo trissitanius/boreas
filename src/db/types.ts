@@ -7,6 +7,8 @@ export type Weekday = 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 export type WeightUnit = 'kg' | 'lb'
 
+export type BodyModel = 'male' | 'female'
+
 /** Every record keeps these, so a future sync can tell which copy is newer. */
 export interface Timestamps {
   createdAt: number
@@ -75,4 +77,6 @@ export interface AppSettings extends Timestamps {
   unit: WeightUnit
   /** When a backup file was last saved. */
   lastBackupAt?: number
+  /** Which body the muscle map shows on this phone (default male). */
+  bodyModel?: BodyModel
 }

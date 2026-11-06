@@ -10,6 +10,9 @@ import { useLastResult } from '../lib/useLastResult'
 import { strings } from '../strings'
 import { LastTime } from './LastTime'
 import { ExerciseEditor } from './ExerciseEditor'
+import { LazyBodyMap } from './LazyBodyMap'
+import { MuscleSheet } from './MuscleSheet'
+import { useBodyModel } from '../lib/useBodyModel'
 
 interface Props {
   exercise: Exercise
@@ -32,6 +35,9 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
   const currentSet = setNumbers.find((n) => !sets.some((s) => s.setNumber === n))
   const [editorOpen, setEditorOpen] = useState(false)
   const closeEditor = useCallback(() => setEditorOpen(false), [])
+  const [musclesOpen, setMusclesOpen] = useState(false)
+  const closeMuscles = useCallback(() => setMusclesOpen(false), [])
+  const [bodyModel] = useBodyModel()
 
   return (
     <section>
@@ -83,7 +89,26 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
           {next ? strings.nextExercise(next.name) : strings.allDoneBack}
         </button>
       )}
+      <section className="muscle-panel" aria-label={strings.muscleMap.editMuscles}>
+        <LazyBodyMap
+          selection={{ primary: exercise.primaryMuscles, secondary: exercise.secondaryMuscles }}
+          model={bodyModel}
+        />
+        <div className="muscle-panel-footer">
+          <span className="muscle-legend">
+            <span className="legend-dot is-primary" aria-hidden="true" />
+            {strings.muscleMap.primary}
+            <span className="legend-dot is-secondary" aria-hidden="true" />
+            {strings.muscleMap.secondary}
+          </span>
+          <button type="button" className="btn btn-small" onClick={() => setMusclesOpen(true)}>
+            {strings.muscleMap.editMuscles}
+          </button>
+        </div>
+      </section>
+
       {editorOpen && <ExerciseEditor exercise={exercise} onClose={closeEditor} />}
+      {musclesOpen && <MuscleSheet exercise={exercise} onClose={closeMuscles} />}
     </section>
   )
 }

@@ -111,7 +111,13 @@ const SHAPES: Record<(typeof TABLES)[number], Record<string, Check>> = {
     reps: intIn(0, 999),
     loggedAt: isNumber,
   },
-  settings: { ...stamps, id: oneOf('app'), unit: oneOf('kg', 'lb'), lastBackupAt: optional(isNumber) },
+  settings: {
+    ...stamps,
+    id: oneOf('app'),
+    unit: oneOf('kg', 'lb'),
+    lastBackupAt: optional(isNumber),
+    bodyModel: optional(oneOf('male', 'female')),
+  },
 }
 
 class BackupError extends Error {}

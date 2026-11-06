@@ -183,6 +183,9 @@ export interface ExerciseChanges {
   settings?: string
   cues?: string[]
   weightIncrementKg?: number
+  /** Both lists are saved together; give both when changing muscles. */
+  primaryMuscles?: Muscle[]
+  secondaryMuscles?: Muscle[]
 }
 
 /** Tidies cues: trimmed, no empty ones, no duplicates, capped in number and length. */
@@ -204,6 +207,10 @@ export function cleanCues(cues: string[]): string[] {
 export async function updateExercise(db: BoreasDB, id: string, changes: ExerciseChanges): Promise<void> {
   const step = changes.weightIncrementKg
   if (step !== undefined) checkStep(step)
+  const muscles =
+    changes.primaryMuscles !== undefined || changes.secondaryMuscles !== undefined
+      ? cleanMuscles(changes.primaryMuscles ?? [], changes.secondaryMuscles ?? [])
+      : undefined
   await db.transaction('rw', db.exercises, async () => {
     const exercise = await db.exercises.get(id)
     if (!exercise) throw new Error(`Unknown exercise: ${id}`)
@@ -211,12 +218,27 @@ export async function updateExercise(db: BoreasDB, id: string, changes: Exercise
       ...(changes.settings !== undefined ? { settings: changes.settings.trim().slice(0, LIMITS.settingsLength) } : {}),
       ...(changes.cues !== undefined ? { cues: cleanCues(changes.cues) } : {}),
       ...(step !== undefined ? { weightIncrementKg: step } : {}),
+      ...(muscles ?? {}),
       updatedAt: Math.max(Date.now(), exercise.updatedAt + 1),
     })
   })
 }
 
 // ---------- Day editor: days, new machines, new exercises ----------
+
+/**
+ * Checks and tidies an exercise's muscles: only known muscles, at least one primary,
+ * no duplicates, and a muscle that's primary is never also secondary.
+ */
+export function cleanMuscles(primary: Muscle[], secondary: Muscle[]): { primaryMuscles: Muscle[]; secondaryMuscles: Muscle[] } {
+  const allowed = new Set<string>(MUSCLES)
+  const unknown = [...primary, ...secondary].filter((m) => !allowed.has(m))
+  if (unknown.length) throw new Error(`Unknown muscles: ${unknown.join(', ')}`)
+  const primaryMuscles = [...new Set(primary)]
+  if (primaryMuscles.length === 0) throw new Error('Pick at least one primary muscle')
+  const secondaryMuscles = [...new Set(secondary)].filter((m) => !primaryMuscles.includes(m))
+  return { primaryMuscles, secondaryMuscles }
+}
 
 export const EDITOR_LIMITS = {
   dayNameLength: 40,
@@ -310,13 +332,7 @@ export async function createExercise(db: BoreasDB, input: NewExercise): Promise<
   const name = input.name.trim()
   if (!name || name.length > EDITOR_LIMITS.exerciseNameLength) throw new Error('Name must be 1–60 characters')
   if (!LOAD_TYPES.includes(input.loadType)) throw new Error(`Invalid load type: ${input.loadType}`)
-  const allowed = new Set<string>(MUSCLES)
-  const all = [...input.primaryMuscles, ...(input.secondaryMuscles ?? [])]
-  const unknown = all.filter((m) => !allowed.has(m))
-  if (unknown.length) throw new Error(`Unknown muscles: ${unknown.join(', ')}`)
-  const primaryMuscles = [...new Set(input.primaryMuscles)]
-  if (primaryMuscles.length === 0) throw new Error('Pick at least one primary muscle')
-  const secondaryMuscles = [...new Set(input.secondaryMuscles ?? [])].filter((m) => !primaryMuscles.includes(m))
+  const { primaryMuscles, secondaryMuscles } = cleanMuscles(input.primaryMuscles, input.secondaryMuscles ?? [])
   const step = input.weightIncrementKg ?? LIMITS.defaultIncrementKg
   checkStep(step)
   const variant = input.variant?.trim().slice(0, EDITOR_LIMITS.variantLength)
