@@ -31,7 +31,7 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, o
         </h2>
       </div>
       {exercise.settings && <p className="settings-line">{exercise.settings}</p>}
-      <LastTime exerciseId={exercise.id} today={date} />
+      <LastTime exercise={exercise} today={date} />
       {exercise.cues.length > 0 && (
         <ul className="cues">
           {exercise.cues.map((cue) => (

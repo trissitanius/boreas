@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from './db/db'
-import { getSetsForDay } from './db/repo'
+import { getLastResult, getSetsForDay } from './db/repo'
+import { progression } from './lib/progression'
 import type { Weekday } from './db/types'
 import { formatLongDate } from './lib/dates'
 import { dayProgress, isRestDay, nextUpExerciseId, nextWorkout, templateForWeekday } from './lib/schedule'
@@ -41,6 +42,20 @@ export function App() {
     () => (template ? getSetsForDay(db, today, template.id) : []),
     [today, template?.id],
   )
+
+  // Exercises of this day whose last session (before today, any day) earned "Increase weight".
+  const flagged = useLiveQuery(async () => {
+    if (!data || !template) return new Set<string>()
+    const ids = [...new Set(template.exerciseIds)]
+    const due = await Promise.all(
+      ids.map(async (id) => {
+        const exercise = data.exercises.get(id)
+        if (!exercise) return null
+        return progression(await getLastResult(db, id, { before: today }), exercise) ? id : null
+      }),
+    )
+    return new Set(due.filter((id): id is string => id !== null))
+  }, [data, template?.id, today])
 
   if (!data || !template) return <main className="app muted">{strings.loading}</main>
 
@@ -98,6 +113,7 @@ export function App() {
         exercises={data.exercises}
         machines={data.machines}
         sets={sets ?? []}
+        flagged={flagged}
         nextWorkoutText={nextWorkoutText}
         onOpen={setExerciseId}
       />

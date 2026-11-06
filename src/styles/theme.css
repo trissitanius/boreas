@@ -683,3 +683,50 @@ section > .last-time {
   background: var(--surface);
   border: 1px solid var(--border);
 }
+
+/* ---------- Progression: "Increase weight" (the one loud Ember badge) ---------- */
+.progression {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 10px;
+}
+
+.progression-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.95rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.progression-hint {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.progression-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.95rem;
+  font-weight: 900;
+  vertical-align: middle;
+}
+
+.progression-hint.is-note {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--soft);
+}

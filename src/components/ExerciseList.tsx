@@ -9,12 +9,14 @@ interface Props {
   machines: Map<string, Machine>
   /** Sets logged today for this day. */
   sets: SetLog[]
+  /** Exercises due for "Increase weight" (shown as a small ↑). */
+  flagged?: Set<string>
   /** Shown on rest days, e.g. "Next: Friday · Arms (tomorrow)". */
   nextWorkoutText?: string
   onOpen: (exerciseId: string) => void
 }
 
-export function ExerciseList({ template, exercises, machines, sets, nextWorkoutText, onOpen }: Props) {
+export function ExerciseList({ template, exercises, machines, sets, flagged, nextWorkoutText, onOpen }: Props) {
   if (isRestDay(template)) {
     return (
       <section className="rest-day">
@@ -33,6 +35,7 @@ export function ExerciseList({ template, exercises, machines, sets, nextWorkoutT
         const gymNumber = machine?.gymNumber ?? strings.noMachine
         const logged = exerciseStatus(sets, id)
         const done = logged >= SETS_PER_EXERCISE
+        const due = flagged?.has(id) ?? false
         return (
           <li key={id}>
             <button
@@ -49,9 +52,14 @@ export function ExerciseList({ template, exercises, machines, sets, nextWorkoutT
                 <br />
                 <span className="exercise-meta">{exercise.settings}</span>
               </span>
-              {logged > 0 && (
+              {(logged > 0 || due) && (
                 <span className="exercise-status">
-                  {done ? strings.exerciseDone : strings.setCount(logged, SETS_PER_EXERCISE)}
+                  {due && (
+                    <span className="progression-mark" role="img" aria-label={strings.dueForIncrease} title={strings.dueForIncrease}>
+                      ↑
+                    </span>
+                  )}
+                  {logged > 0 && (done ? strings.exerciseDone : strings.setCount(logged, SETS_PER_EXERCISE))}
                 </span>
               )}
             </button>

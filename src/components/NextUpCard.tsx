@@ -35,7 +35,7 @@ export function NextUpCard({ exercise, machine, today, onOpen }: Props) {
           {exercise.settings && <span className="exercise-meta next-up-settings">{exercise.settings}</span>}
         </span>
       </span>
-      <LastTime exerciseId={exercise.id} today={today} />
+      <LastTime exercise={exercise} today={today} />
     </button>
   )
 }
