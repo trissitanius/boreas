@@ -20,6 +20,12 @@ export function App() {
   const [otherWeekday, setOtherWeekday] = useState<Weekday | null>(null)
   const [exerciseId, setExerciseId] = useState<string | null>(null)
 
+  /** Opens an exercise (or goes back to the list with null), starting at the top of the screen. */
+  function openExercise(id: string | null) {
+    setExerciseId(id)
+    window.scrollTo(0, 0)
+  }
+
   const weekday = otherWeekday ?? todayWeekday
   const isToday = weekday === todayWeekday
 
@@ -61,15 +67,23 @@ export function App() {
 
   const exercise = exerciseId ? data.exercises.get(exerciseId) : undefined
   if (exercise) {
+    // The next unfinished exercise of the day, not counting the one on screen.
+    const nextId = nextUpExerciseId(
+      { ...template, exerciseIds: template.exerciseIds.filter((id) => id !== exercise.id) },
+      sets ?? [],
+    )
     return (
       <main className="app">
         <ExerciseLogger
+          key={exercise.id}
           exercise={exercise}
           machine={exercise.machineId ? data.machines.get(exercise.machineId) : undefined}
           dayTemplateId={template.id}
           date={today}
           sets={(sets ?? []).filter((s) => s.exerciseId === exercise.id)}
-          onBack={() => setExerciseId(null)}
+          next={nextId ? data.exercises.get(nextId) : undefined}
+          onNext={() => openExercise(nextId ?? null)}
+          onBack={() => openExercise(null)}
         />
       </main>
     )
@@ -104,7 +118,7 @@ export function App() {
           exercise={nextUp}
           machine={nextUp?.machineId ? data.machines.get(nextUp.machineId) : undefined}
           today={today}
-          onOpen={setExerciseId}
+          onOpen={openExercise}
         />
       )}
 
@@ -115,7 +129,7 @@ export function App() {
         sets={sets ?? []}
         flagged={flagged}
         nextWorkoutText={nextWorkoutText}
-        onOpen={setExerciseId}
+        onOpen={openExercise}
       />
 
       <OtherDays

@@ -730,3 +730,96 @@ section > .last-time {
   font-weight: 600;
   color: var(--soft);
 }
+
+/* ---------- Fast logging ---------- */
+:root {
+  --tap-big: 64px;
+}
+
+.set-row {
+  padding: 12px 10px;
+  margin: 0 -10px;
+  border-radius: 14px;
+}
+
+/* The set you're on: highlighted, with big fields */
+.set-row.is-current {
+  border-top-color: transparent;
+  background: var(--surface-strong);
+  outline: 1px solid rgb(var(--frozen-rgb) / 0.45);
+}
+
+.set-row.is-current + .set-row {
+  border-top-color: transparent;
+}
+
+.set-row.is-current .field input,
+.set-row.is-current .btn-primary {
+  min-height: var(--tap-big);
+}
+
+.set-row.is-current .reps-input {
+  font-size: 2rem;
+}
+
+/* A logged set: one folded line */
+.set-row.is-logged {
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.set-check {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--bg);
+  font-weight: 900;
+}
+
+.set-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.set-result {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-small {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 14px;
+  font-size: 0.95rem;
+}
+
+.set-edit-actions {
+  grid-column: 2 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-next {
+  width: 100%;
+  min-height: var(--tap-big);
+  margin-top: 18px;
+  border-radius: 16px;
+  font-size: 1.15rem;
+}
+
+/* Rows are separated by space, not lines (lines looked odd on the rounded rows) */
+.set-row,
+.set-row.is-current + .set-row {
+  border-top: none;
+}
+
+.set-row + .set-row {
+  margin-top: 4px;
+}
