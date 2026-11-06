@@ -14,6 +14,8 @@ import { ExerciseLogger } from './components/ExerciseLogger'
 import { OtherDays } from './components/OtherDays'
 import { NextUpCard } from './components/NextUpCard'
 import { DayEditor } from './components/DayEditor'
+import { BackupScreen, formatLastBackup } from './components/BackupScreen'
+import { needsBackupReminder } from './lib/backupReminder'
 
 export function App() {
   const { date: today, weekday: todayWeekday } = useToday()
@@ -21,6 +23,7 @@ export function App() {
   const [otherWeekday, setOtherWeekday] = useState<Weekday | null>(null)
   const [exerciseId, setExerciseId] = useState<string | null>(null)
   const [editingDay, setEditingDay] = useState(false)
+  const [showBackup, setShowBackup] = useState(false)
 
   /** Opens an exercise (or goes back to the list with null), starting at the top of the screen. */
   function openExercise(id: string | null) {
@@ -65,7 +68,27 @@ export function App() {
     return new Set(due.filter((id): id is string => id !== null))
   }, [data, template?.id, today])
 
+  // For the gentle "back up" reminder.
+  const backupInfo = useLiveQuery(async () => ({
+    lastBackupAt: (await db.settings.get('app'))?.lastBackupAt,
+    sessionCount: await db.sessions.count(),
+  }))
+
   if (!data || !template) return <main className="app muted">{strings.loading}</main>
+
+  if (showBackup) {
+    return (
+      <main className="app">
+        <BackupScreen
+          today={today}
+          onClose={() => {
+            setShowBackup(false)
+            window.scrollTo(0, 0)
+          }}
+        />
+      </main>
+    )
+  }
 
   if (editingDay) {
     return (
@@ -132,6 +155,15 @@ export function App() {
         )}
       </TodayHeader>
 
+      {backupInfo && needsBackupReminder(backupInfo) && (
+        <p className="backup-reminder">
+          {strings.backup.reminder(formatLastBackup(backupInfo.lastBackupAt, today))} ·{' '}
+          <button type="button" className="link-button" onClick={() => setShowBackup(true)}>
+            {strings.backup.backUpNow}
+          </button>
+        </p>
+      )}
+
       {!rest && sets !== undefined && (
         <NextUpCard
           exercise={nextUp}
@@ -151,16 +183,28 @@ export function App() {
         onOpen={openExercise}
       />
 
-      <button
-        type="button"
-        className="btn btn-small edit-day-button"
-        onClick={() => {
-          setEditingDay(true)
-          window.scrollTo(0, 0)
-        }}
-      >
-        {strings.dayEditor.editDay}
-      </button>
+      <div className="today-tools">
+        <button
+          type="button"
+          className="btn btn-small"
+          onClick={() => {
+            setEditingDay(true)
+            window.scrollTo(0, 0)
+          }}
+        >
+          {strings.dayEditor.editDay}
+        </button>
+        <button
+          type="button"
+          className="btn btn-small"
+          onClick={() => {
+            setShowBackup(true)
+            window.scrollTo(0, 0)
+          }}
+        >
+          {strings.backup.button}
+        </button>
+      </div>
 
       <OtherDays
         templates={data.templates}

@@ -964,11 +964,6 @@ section > .last-time {
 }
 
 /* ---------- Day editor ---------- */
-.edit-day-button {
-  display: block;
-  margin: 16px auto 0;
-}
-
 .day-editor-title {
   margin: 4px 0 18px;
   font-size: 2.2rem;
@@ -1167,4 +1162,91 @@ section > .last-time {
 
 .icon-btn {
   width: 40px;
+}
+
+/* ---------- Backup ---------- */
+.today-tools {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.backup-reminder {
+  margin: -8px 2px 14px;
+  font-size: 0.95rem;
+  color: var(--soft);
+}
+
+.link-button {
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.backup-intro {
+  margin: -6px 0 18px;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.backup-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-strong);
+}
+
+.backup-facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 14px;
+  margin: 0 0 16px;
+}
+
+.backup-facts dt {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--soft);
+}
+
+.backup-facts dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.backup-download {
+  display: block;
+  margin: 10px auto 0;
+}
+
+.backup-message {
+  margin: 14px 2px 0;
+  font-weight: 700;
+  color: var(--soft);
+}
+
+.backup-restore-intro {
+  margin: 0 0 12px;
+}
+
+.restore-from {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.restore-compare {
+  margin: 12px 0;
+  line-height: 1.6;
+}
+
+.restore-question {
+  margin: 0 0 12px;
+  font-weight: 700;
 }

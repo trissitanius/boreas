@@ -8,3 +8,12 @@ export async function requestPersistentStorage(): Promise<void> {
     // Not supported or refused: the app still works, the data is just less protected.
   }
 }
+
+/** Whether the browser promised to keep this app's data (undefined if it can't tell). */
+export async function isStoragePersisted(): Promise<boolean | undefined> {
+  try {
+    return navigator.storage?.persisted ? await navigator.storage.persisted() : undefined
+  } catch {
+    return undefined
+  }
+}

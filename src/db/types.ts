@@ -73,4 +73,6 @@ export interface SetLog extends Timestamps {
 export interface AppSettings extends Timestamps {
   id: 'app'
   unit: WeightUnit
+  /** When a backup file was last saved. */
+  lastBackupAt?: number
 }

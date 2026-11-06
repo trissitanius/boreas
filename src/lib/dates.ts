@@ -23,3 +23,12 @@ export function formatLongDate(isoDate: string): string {
     month: 'long',
   })
 }
+
+/** Whole calendar days from one local date to another ("2026-11-04" → "2026-11-06" = 2). */
+export function daysBetween(fromIso: string, toIso: string): number {
+  const toDate = (iso: string) => {
+    const [y, m, d] = iso.split('-').map(Number)
+    return Date.UTC(y, m - 1, d)
+  }
+  return Math.round((toDate(toIso) - toDate(fromIso)) / 86_400_000)
+}

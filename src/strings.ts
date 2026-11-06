@@ -147,6 +147,43 @@ export const strings = {
     calves: 'Calves',
   } satisfies Record<Muscle, string>,
 
+  // Backup
+  backup: {
+    button: 'Backup',
+    title: 'Backup',
+    intro: 'Your workouts are stored only on this phone. Save a backup file now and then, so they’re safe if the phone or browser data is lost.',
+    save: 'Save backup',
+    downloadInstead: 'Download file instead',
+    saved: 'Backup saved.',
+    lastBackup: 'Last backup',
+    never: 'Never',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    daysAgo: (n: number) => `${n} days ago`,
+    storage: 'Storage',
+    persisted: 'Your browser keeps Boreas’ data.',
+    notPersisted: 'Your browser may clear data when space runs low. Keep backups.',
+    restoreTitle: 'Restore',
+    restoreIntro: 'Load a backup file. It replaces all data on this phone.',
+    restore: 'Restore from backup',
+    backupFrom: (date: string) => `Backup from ${date}`,
+    summary: (sessions: number, sets: number, exercises: number, machines: number) =>
+      `${sessions} sessions · ${sets} sets · ${exercises} exercises · ${machines} machines`,
+    onPhone: (sessions: number) => `On this phone now: ${sessions} sessions`,
+    inBackup: (sessions: number) => `In the backup: ${sessions} sessions`,
+    confirm: 'Replace all data on this phone with this backup?',
+    replace: 'Replace data',
+    restored: 'Backup restored.',
+    reminder: (when: string) => `Last backup: ${when}`,
+    backUpNow: 'Back up now',
+    errors: {
+      notJson: 'This file isn’t a Boreas backup (it can’t be read).',
+      notBoreas: 'This file isn’t a Boreas backup.',
+      newerFormat: 'This backup was made by a newer version of Boreas. Update the app (close and reopen it) and try again.',
+      damaged: (detail: string) => `This backup file is damaged and can’t be used (${detail}).`,
+    },
+  },
+
   // Welcome page (the website)
   landing: {
     eyebrow: 'Workout tracker',
