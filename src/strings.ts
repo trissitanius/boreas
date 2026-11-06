@@ -1,0 +1,22 @@
+// All text shown in the app, in one place so translations can be added later.
+export const strings = {
+  appName: 'Boreas',
+  loading: 'Loading…',
+  weekdaysShort: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  today: 'Today',
+  restDay: 'Rest day',
+  restDayHint: 'Recover. Nothing to log.',
+  noMachine: 'Floor',
+  back: '‹ Back',
+  setLabel: (n: number) => `Set ${n}`,
+  weight: 'Weight',
+  reps: 'Reps',
+  kg: 'kg',
+  bodyweight: 'Bodyweight',
+  save: 'Save',
+  delete: 'Delete',
+  invalidWeight: 'Enter a weight, e.g. 22.5',
+  invalidReps: 'Enter whole reps, e.g. 10',
+  saveFailed: 'Could not save. Try again.',
+  setsLoggedToday: (n: number, total: number) => `${n}/${total} sets today`,
+}
