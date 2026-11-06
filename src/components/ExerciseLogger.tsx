@@ -4,6 +4,7 @@ import { deleteSet, logSet, SETS_PER_EXERCISE } from '../db/repo'
 import type { Exercise, Machine, SetLog } from '../db/types'
 import { parseReps, parseWeight } from '../lib/parse'
 import { strings } from '../strings'
+import { LastTime } from './LastTime'
 
 interface Props {
   exercise: Exercise
@@ -30,6 +31,7 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, o
         </h2>
       </div>
       {exercise.settings && <p className="settings-line">{exercise.settings}</p>}
+      <LastTime exerciseId={exercise.id} today={date} />
       {exercise.cues.length > 0 && (
         <ul className="cues">
           {exercise.cues.map((cue) => (

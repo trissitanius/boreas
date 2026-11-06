@@ -597,3 +597,89 @@ button {
 .guide-close {
   width: 100%;
 }
+
+/* ---------- Next up card + Last time box ---------- */
+.next-up {
+  width: 100%;
+  display: block;
+  margin: 0 0 18px;
+  padding: 14px 16px 16px;
+  text-align: left;
+  border: 1px solid rgb(var(--frozen-rgb) / 0.45);
+  border-radius: 18px;
+  background: var(--surface-strong);
+}
+
+.next-up-label {
+  display: block;
+  margin: 0 0 8px;
+}
+
+.next-up-done .next-up-label {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.next-up-done p:last-child {
+  margin: 0;
+}
+
+.next-up-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.next-up-number {
+  min-width: 64px;
+  font-size: 2.8rem;
+  line-height: 1;
+}
+
+.next-up-number.small {
+  font-size: 1.6rem;
+}
+
+.next-up-settings {
+  display: block;
+}
+
+.last-time {
+  display: block;
+  min-height: 58px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgb(var(--frozen-rgb) / 0.08);
+}
+
+.last-time-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.last-time-sets {
+  display: block;
+  margin-top: 2px;
+  font-size: 1.45rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.last-time-when {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--soft);
+}
+
+/* On the logging screen the box sits right under the settings */
+section > .last-time {
+  margin: 4px 0 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}

@@ -4,13 +4,14 @@ import { db } from './db/db'
 import { getSetsForDay } from './db/repo'
 import type { Weekday } from './db/types'
 import { formatLongDate } from './lib/dates'
-import { dayProgress, isRestDay, nextWorkout, templateForWeekday } from './lib/schedule'
+import { dayProgress, isRestDay, nextUpExerciseId, nextWorkout, templateForWeekday } from './lib/schedule'
 import { useToday } from './lib/useToday'
 import { strings } from './strings'
 import { TodayHeader } from './components/TodayHeader'
 import { ExerciseList } from './components/ExerciseList'
 import { ExerciseLogger } from './components/ExerciseLogger'
 import { OtherDays } from './components/OtherDays'
+import { NextUpCard } from './components/NextUpCard'
 
 export function App() {
   const { date: today, weekday: todayWeekday } = useToday()
@@ -61,6 +62,8 @@ export function App() {
 
   const rest = isRestDay(template)
   const progress = dayProgress(template, sets ?? [])
+  const nextUpId = rest ? undefined : nextUpExerciseId(template, sets ?? [])
+  const nextUp = nextUpId ? data.exercises.get(nextUpId) : undefined
   const next = rest ? nextWorkout(data.templates, weekday) : undefined
   const nextWorkoutText = next
     ? strings.nextWorkout(strings.weekdaysLong[next.template.weekday - 1], next.template.name) +
@@ -80,6 +83,15 @@ export function App() {
           </button>
         )}
       </TodayHeader>
+
+      {!rest && sets !== undefined && (
+        <NextUpCard
+          exercise={nextUp}
+          machine={nextUp?.machineId ? data.machines.get(nextUp.machineId) : undefined}
+          today={today}
+          onOpen={setExerciseId}
+        />
+      )}
 
       <ExerciseList
         template={template}

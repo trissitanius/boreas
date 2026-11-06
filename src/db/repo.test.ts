@@ -156,3 +156,45 @@ describe('getLastResult (history belongs to the exercise, not the day)', () => {
     expect(last?.sets.every((s) => s.weightKg === null)).toBe(true)
   })
 })
+
+describe('getLastResult with "before" (last time ignores today)', () => {
+  const TODAY = '2026-11-13' // next Friday
+
+  it('keeps showing the previous session while today is being logged', async () => {
+    await logThree('ex-dumbbell-curl', 'day-wed', WED, [[14, 13], [14, 12], [14, 10]])
+    await logSet(db, {
+      exerciseId: 'ex-dumbbell-curl',
+      dayTemplateId: 'day-fri',
+      date: TODAY,
+      setNumber: 1,
+      weightKg: 16,
+      reps: 8,
+      loggedAt: at(TODAY, 0),
+    })
+
+    const last = await getLastResult(db, 'ex-dumbbell-curl', { before: TODAY })
+    expect(last?.date).toBe(WED)
+    expect(last?.dayName).toBe('Pull')
+    expect(last?.sets.map((s) => s.reps)).toEqual([13, 12, 10])
+
+    // Without "before", today's set is the newest.
+    expect((await getLastResult(db, 'ex-dumbbell-curl'))?.date).toBe(TODAY)
+  })
+
+  it('is empty when the only history is from today', async () => {
+    await logThree('ex-leg-curl', 'day-mon', TODAY, [[40, 10], [40, 9], [40, 8]])
+    expect(await getLastResult(db, 'ex-leg-curl', { before: TODAY })).toBeUndefined()
+  })
+
+  it('goes by session date: an older session typed in later does not count as newer', async () => {
+    await logThree('ex-dumbbell-curl', 'day-fri', FRI, [[16, 9], [16, 8], [16, 7]])
+    // Wednesday's session entered afterwards (e.g. a forgotten paper log)
+    await logThree('ex-dumbbell-curl', 'day-wed', WED, [[14, 13], [14, 12], [14, 10]])
+    await db.setLogs.toCollection().modify((l) => {
+      if (l.weightKg === 14) l.loggedAt += 1_000_000_000
+    })
+
+    const last = await getLastResult(db, 'ex-dumbbell-curl', { before: TODAY })
+    expect(last?.date).toBe(FRI)
+  })
+})

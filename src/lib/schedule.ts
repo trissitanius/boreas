@@ -34,3 +34,8 @@ export function dayProgress(template: DayTemplate, sets: SetLog[]): { done: numb
   const done = ids.filter((id) => exerciseStatus(sets, id) >= SETS_PER_EXERCISE).length
   return { done, total: ids.length }
 }
+
+/** The first exercise of the day that doesn't have all its sets yet (undefined when all are done). */
+export function nextUpExerciseId(template: DayTemplate, sets: SetLog[]): string | undefined {
+  return template.exerciseIds.find((id) => exerciseStatus(sets, id) < SETS_PER_EXERCISE)
+}

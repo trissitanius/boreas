@@ -131,22 +131,35 @@ export interface LastResult {
 /**
  * The most recent session of this exercise on ANY day, with its sets in order.
  * This is the app's core rule: history belongs to the exercise, not the day.
+ *
+ * "Most recent" means the latest session date (then the latest logging time on that date).
+ * `before: "YYYY-MM-DD"` only looks at sessions before that date, so while you log today,
+ * "last time" keeps showing your previous session instead of today's half-finished one.
  */
-export async function getLastResult(db: BoreasDB, exerciseId: string): Promise<LastResult | undefined> {
-  const latest = await db.setLogs
+export async function getLastResult(
+  db: BoreasDB,
+  exerciseId: string,
+  options: { before?: string } = {},
+): Promise<LastResult | undefined> {
+  const logs = await db.setLogs
     .where('[exerciseId+loggedAt]')
     .between([exerciseId, Dexie.minKey], [exerciseId, Dexie.maxKey])
-    .last()
-  if (!latest) return undefined
+    .toArray()
+  if (logs.length === 0) return undefined
 
-  const session = await db.sessions.get(latest.sessionId)
-  if (!session) return undefined
+  const sessionIds = [...new Set(logs.map((l) => l.sessionId))]
+  const sessions = (await db.sessions.bulkGet(sessionIds)).filter(
+    (s): s is Session => s !== undefined && (options.before === undefined || s.date < options.before),
+  )
+  if (sessions.length === 0) return undefined
+
+  const latestLogAt = (sessionId: string) =>
+    Math.max(...logs.filter((l) => l.sessionId === sessionId).map((l) => l.loggedAt))
+  sessions.sort((a, b) => b.date.localeCompare(a.date) || latestLogAt(b.id) - latestLogAt(a.id))
+  const session = sessions[0]
+
   const day = await db.dayTemplates.get(session.dayTemplateId)
-  const sets = await db.setLogs
-    .where('sessionId')
-    .equals(session.id)
-    .filter((s) => s.exerciseId === exerciseId)
-    .sortBy('setNumber')
+  const sets = logs.filter((l) => l.sessionId === session.id).sort((a, b) => a.setNumber - b.setNumber)
 
   return {
     date: session.date,

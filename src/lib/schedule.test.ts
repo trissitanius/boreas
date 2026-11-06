@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildSeed } from '../db/seed'
 import type { DayTemplate, SetLog } from '../db/types'
-import { dayProgress, exerciseStatus, isRestDay, nextWorkout, templateForWeekday } from './schedule'
+import { dayProgress, exerciseStatus, isRestDay, nextUpExerciseId, nextWorkout, templateForWeekday } from './schedule'
 import { formatLongDate } from './dates'
 
 const templates = buildSeed(0).dayTemplates
@@ -87,6 +87,28 @@ describe('progress', () => {
 
   it('shows 0 of 0 on a rest day', () => {
     expect(dayProgress(templateForWeekday(templates, 4)!, [])).toEqual({ done: 0, total: 0 })
+  })
+})
+
+describe('nextUpExerciseId', () => {
+  const arms = templateForWeekday(templates, 5)!
+  const three = (id: string) => [set(id, 1), set(id, 2), set(id, 3)]
+
+  it('is the first exercise when nothing is logged', () => {
+    expect(nextUpExerciseId(arms, [])).toBe('ex-preacher-curl')
+  })
+
+  it('stays on an exercise until all 3 sets are logged', () => {
+    expect(nextUpExerciseId(arms, [set('ex-preacher-curl', 1), set('ex-preacher-curl', 2)])).toBe('ex-preacher-curl')
+  })
+
+  it('skips finished exercises, even out of order', () => {
+    expect(nextUpExerciseId(arms, three('ex-preacher-curl'))).toBe('ex-dumbbell-curl')
+    expect(nextUpExerciseId(arms, [...three('ex-preacher-curl'), ...three('ex-y-raise')])).toBe('ex-dumbbell-curl')
+  })
+
+  it('is undefined when everything is done', () => {
+    expect(nextUpExerciseId(arms, arms.exerciseIds.flatMap(three))).toBeUndefined()
   })
 })
 
