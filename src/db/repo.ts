@@ -1,7 +1,8 @@
 // All reads and writes the screens need. Screens call these instead of using Dexie directly.
 import Dexie from 'dexie'
 import type { BoreasDB } from './db'
-import type { Session, SetLog } from './types'
+import type { LoadType, Session, SetLog } from './types'
+import { MUSCLES, type Muscle } from './muscles'
 import { newId } from '../lib/ids'
 import { isValidReps, isValidWeightKg } from '../lib/parse'
 
@@ -175,6 +176,7 @@ export const LIMITS = {
   cueCount: 12,
   minIncrementKg: 0.1,
   maxIncrementKg: 50,
+  defaultIncrementKg: 2.5,
 }
 
 export interface ExerciseChanges {
@@ -201,12 +203,7 @@ export function cleanCues(cues: string[]): string[] {
 /** Saves an exercise's settings, cues and/or weight step. Throws (and saves nothing) on invalid input. */
 export async function updateExercise(db: BoreasDB, id: string, changes: ExerciseChanges): Promise<void> {
   const step = changes.weightIncrementKg
-  if (
-    step !== undefined &&
-    !(Number.isFinite(step) && step >= LIMITS.minIncrementKg && step <= LIMITS.maxIncrementKg)
-  ) {
-    throw new Error(`Invalid weight step: ${step}`)
-  }
+  if (step !== undefined) checkStep(step)
   await db.transaction('rw', db.exercises, async () => {
     const exercise = await db.exercises.get(id)
     if (!exercise) throw new Error(`Unknown exercise: ${id}`)
@@ -216,5 +213,134 @@ export async function updateExercise(db: BoreasDB, id: string, changes: Exercise
       ...(step !== undefined ? { weightIncrementKg: step } : {}),
       updatedAt: Math.max(Date.now(), exercise.updatedAt + 1),
     })
+  })
+}
+
+// ---------- Day editor: days, new machines, new exercises ----------
+
+export const EDITOR_LIMITS = {
+  dayNameLength: 40,
+  exercisesPerDay: 20,
+  gymNumberLength: 10,
+  brandLength: 40,
+  modelLength: 80,
+  exerciseNameLength: 60,
+  variantLength: 40,
+}
+
+const LOAD_TYPES: LoadType[] = ['stack', 'dumbbell', 'plate', 'bodyweight']
+
+function checkStep(step: number) {
+  if (!(Number.isFinite(step) && step >= LIMITS.minIncrementKg && step <= LIMITS.maxIncrementKg)) {
+    throw new Error(`Invalid weight step: ${step}`)
+  }
+}
+
+/** Renames a day and/or sets its exercises (in order). An empty list makes it a rest day. */
+export async function updateDayTemplate(
+  db: BoreasDB,
+  id: string,
+  changes: { name?: string; exerciseIds?: string[] },
+): Promise<void> {
+  const name = changes.name?.trim()
+  if (name !== undefined && (name.length === 0 || name.length > EDITOR_LIMITS.dayNameLength)) {
+    throw new Error('Day name must be 1–40 characters')
+  }
+  const exerciseIds = changes.exerciseIds ? [...new Set(changes.exerciseIds)] : undefined
+  if (exerciseIds && exerciseIds.length > EDITOR_LIMITS.exercisesPerDay) {
+    throw new Error(`At most ${EDITOR_LIMITS.exercisesPerDay} exercises per day`)
+  }
+  await db.transaction('rw', db.dayTemplates, db.exercises, async () => {
+    const day = await db.dayTemplates.get(id)
+    if (!day) throw new Error(`Unknown day: ${id}`)
+    if (exerciseIds) {
+      const found = await db.exercises.bulkGet(exerciseIds)
+      const missing = exerciseIds.filter((_, i) => !found[i])
+      if (missing.length) throw new Error(`Unknown exercises: ${missing.join(', ')}`)
+    }
+    await db.dayTemplates.update(id, {
+      ...(name !== undefined ? { name } : {}),
+      ...(exerciseIds ? { exerciseIds } : {}),
+      updatedAt: Math.max(Date.now(), day.updatedAt + 1),
+    })
+  })
+}
+
+export interface NewMachine {
+  gymNumber: string
+  brand: string
+  model: string
+}
+
+/** Adds a machine. The gym number must be unique (case doesn't matter). Returns the new id. */
+export async function createMachine(db: BoreasDB, input: NewMachine): Promise<string> {
+  const gymNumber = input.gymNumber.trim()
+  const brand = input.brand.trim()
+  const model = input.model.trim()
+  if (!gymNumber || gymNumber.length > EDITOR_LIMITS.gymNumberLength) throw new Error('Gym number must be 1–10 characters')
+  if (!brand || brand.length > EDITOR_LIMITS.brandLength) throw new Error('Brand must be 1–40 characters')
+  if (model.length > EDITOR_LIMITS.modelLength) throw new Error('Model is too long')
+
+  return db.transaction('rw', db.machines, async () => {
+    const all = await db.machines.toArray()
+    if (all.some((m) => m.gymNumber.toLowerCase() === gymNumber.toLowerCase())) {
+      throw new Error(`Machine ${gymNumber} already exists`)
+    }
+    const now = Date.now()
+    const id = newId()
+    await db.machines.add({ id, gymNumber, brand, model, createdAt: now, updatedAt: now })
+    return id
+  })
+}
+
+export interface NewExercise {
+  name: string
+  machineId?: string
+  variant?: string
+  settings?: string
+  loadType: LoadType
+  primaryMuscles: Muscle[]
+  secondaryMuscles?: Muscle[]
+  weightIncrementKg?: number
+  cues?: string[]
+}
+
+/** Adds an exercise (it starts with no history). Returns the new id. */
+export async function createExercise(db: BoreasDB, input: NewExercise): Promise<string> {
+  const name = input.name.trim()
+  if (!name || name.length > EDITOR_LIMITS.exerciseNameLength) throw new Error('Name must be 1–60 characters')
+  if (!LOAD_TYPES.includes(input.loadType)) throw new Error(`Invalid load type: ${input.loadType}`)
+  const allowed = new Set<string>(MUSCLES)
+  const all = [...input.primaryMuscles, ...(input.secondaryMuscles ?? [])]
+  const unknown = all.filter((m) => !allowed.has(m))
+  if (unknown.length) throw new Error(`Unknown muscles: ${unknown.join(', ')}`)
+  const primaryMuscles = [...new Set(input.primaryMuscles)]
+  if (primaryMuscles.length === 0) throw new Error('Pick at least one primary muscle')
+  const secondaryMuscles = [...new Set(input.secondaryMuscles ?? [])].filter((m) => !primaryMuscles.includes(m))
+  const step = input.weightIncrementKg ?? LIMITS.defaultIncrementKg
+  checkStep(step)
+  const variant = input.variant?.trim().slice(0, EDITOR_LIMITS.variantLength)
+
+  return db.transaction('rw', db.exercises, db.machines, async () => {
+    if (input.machineId && !(await db.machines.get(input.machineId))) {
+      throw new Error(`Unknown machine: ${input.machineId}`)
+    }
+    const now = Date.now()
+    const id = newId()
+    await db.exercises.add({
+      id,
+      name,
+      ...(input.machineId ? { machineId: input.machineId } : {}),
+      ...(variant ? { variant } : {}),
+      settings: (input.settings ?? '').trim().slice(0, LIMITS.settingsLength),
+      primaryMuscles,
+      secondaryMuscles,
+      cues: cleanCues(input.cues ?? []),
+      weightIncrementKg: step,
+      loadType: input.loadType,
+      createdAt: now,
+      updatedAt: now,
+    })
+    return id
   })
 }

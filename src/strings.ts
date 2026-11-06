@@ -1,4 +1,7 @@
 // All text shown in the app, in one place so translations can be added later.
+import type { LoadType } from './db/types'
+import type { Muscle } from './db/muscles'
+
 export const strings = {
   appName: 'Boreas',
   /** Used for dates, e.g. "Friday 6 November". */
@@ -64,6 +67,85 @@ export const strings = {
     duplicateCue: 'That cue is already in the list.',
     tooManyCues: 'That’s the maximum number of cues.',
   },
+
+  // Day editor
+  dayEditor: {
+    editDay: 'Edit day',
+    title: (weekday: string) => `Edit ${weekday}`,
+    dayName: 'Day name',
+    exercises: 'Exercises',
+    empty: 'No exercises: this is a rest day.',
+    moveUp: (name: string) => `Move ${name} up`,
+    moveDown: (name: string) => `Move ${name} down`,
+    remove: (name: string) => `Remove ${name} from this day`,
+    removeNote: 'Removing an exercise from a day keeps its history.',
+    addExercise: '+ Add exercise',
+    discardChanges: 'Discard your changes to this day?',
+    invalidName: 'Give the day a name.',
+  },
+  picker: {
+    title: 'Add exercise',
+    search: 'Search exercises',
+    onThisDay: 'On this day',
+    newExercise: '+ New exercise',
+    noResults: 'No exercises found.',
+  },
+  newExercise: {
+    title: 'New exercise',
+    name: 'Name',
+    namePlaceholder: 'e.g. Leg extension',
+    variant: 'Variant (optional)',
+    variantPlaceholder: 'e.g. grip 4',
+    machine: 'Machine',
+    noMachine: 'None (floor, bench, dumbbells)',
+    newMachine: '+ New machine',
+    gymNumber: 'Gym number',
+    gymNumberPlaceholder: 'e.g. N9',
+    brand: 'Brand',
+    model: 'Model (optional)',
+    modelPlaceholder: 'e.g. Nitro Evo Leg Extension',
+    loadType: 'Load',
+    primary: 'Primary muscles',
+    secondary: 'Secondary muscles (optional)',
+    cues: 'Cues (optional, separate with commas)',
+    create: 'Add exercise',
+    back: '‹ Back to list',
+    needName: 'Give the exercise a name.',
+    needPrimary: 'Pick at least one primary muscle.',
+    needGymNumber: 'Enter the machine’s gym number.',
+    needBrand: 'Enter the machine’s brand.',
+    duplicateMachine: (n: string) => `Machine ${n} already exists. Pick it from the list.`,
+  },
+  loadTypes: {
+    stack: 'Machine stack',
+    dumbbell: 'Dumbbells',
+    plate: 'Plates',
+    bodyweight: 'Bodyweight',
+  } satisfies Record<LoadType, string>,
+  muscles: {
+    chest: 'Chest',
+    'upper-chest': 'Upper chest',
+    'front-delts': 'Front delts',
+    'side-delts': 'Side delts',
+    'rear-delts': 'Rear delts',
+    triceps: 'Triceps',
+    biceps: 'Biceps',
+    forearms: 'Forearms',
+    lats: 'Lats',
+    'upper-back': 'Upper back',
+    'mid-back': 'Mid back',
+    'lower-back': 'Lower back',
+    traps: 'Traps',
+    abs: 'Abs',
+    obliques: 'Obliques',
+    'hip-flexors': 'Hip flexors',
+    glutes: 'Glutes',
+    quads: 'Quads',
+    hamstrings: 'Hamstrings',
+    adductors: 'Adductors',
+    abductors: 'Abductors',
+    calves: 'Calves',
+  } satisfies Record<Muscle, string>,
 
   // Welcome page (the website)
   landing: {

@@ -2,12 +2,15 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { BoreasDB } from './db'
 import {
   cleanCues,
+  createExercise,
+  createMachine,
   deleteSet,
   getLastResult,
   getOrCreateSession,
   getSetsForDay,
   LIMITS,
   logSet,
+  updateDayTemplate,
   updateExercise,
   updateSet,
 } from './repo'
@@ -263,5 +266,99 @@ describe('updateExercise (feature 6)', () => {
     const curl = (await db.exercises.get('ex-dumbbell-curl'))!
     const last = await getLastResult(db, curl.id, { before: FRI })
     expect(progression(last, curl)).toEqual({ kind: 'increase', fromKg: 14, suggestedKg: 16 })
+  })
+})
+
+describe('updateDayTemplate (day editor)', () => {
+  it('saves a new order and name', async () => {
+    await updateDayTemplate(db, 'day-fri', {
+      name: '  Arms day ',
+      exerciseIds: ['ex-dumbbell-curl', 'ex-preacher-curl', 'ex-seated-crunch'],
+    })
+    const fri = (await db.dayTemplates.get('day-fri'))!
+    expect(fri.name).toBe('Arms day')
+    expect(fri.exerciseIds).toEqual(['ex-dumbbell-curl', 'ex-preacher-curl', 'ex-seated-crunch'])
+  })
+
+  it('removing an exercise from a day keeps the exercise and its history', async () => {
+    await logThree('ex-preacher-curl', 'day-fri', WED, [[30, 12], [30, 11], [30, 10]])
+    await updateDayTemplate(db, 'day-fri', { exerciseIds: ['ex-dumbbell-curl'] })
+    expect(await db.exercises.get('ex-preacher-curl')).toBeDefined()
+    expect(await db.setLogs.count()).toBe(3)
+    expect((await getLastResult(db, 'ex-preacher-curl'))?.sets.map((s) => s.reps)).toEqual([12, 11, 10])
+  })
+
+  it('removes duplicates and allows an empty day (rest day)', async () => {
+    await updateDayTemplate(db, 'day-mon', { exerciseIds: ['ex-leg-press', 'ex-leg-press', 'ex-calf-press'] })
+    expect((await db.dayTemplates.get('day-mon'))!.exerciseIds).toEqual(['ex-leg-press', 'ex-calf-press'])
+    await updateDayTemplate(db, 'day-mon', { exerciseIds: [] })
+    expect((await db.dayTemplates.get('day-mon'))!.exerciseIds).toEqual([])
+  })
+
+  it('refuses unknown exercises, empty names and unknown days', async () => {
+    await expect(updateDayTemplate(db, 'day-mon', { exerciseIds: ['ex-leg-press', 'ex-nope'] })).rejects.toThrow()
+    await expect(updateDayTemplate(db, 'day-mon', { name: '   ' })).rejects.toThrow()
+    await expect(updateDayTemplate(db, 'day-nope', { name: 'X' })).rejects.toThrow()
+    expect((await db.dayTemplates.get('day-mon'))!.exerciseIds).toHaveLength(5)
+  })
+})
+
+describe('createMachine', () => {
+  it('saves a machine with a new id', async () => {
+    const id = await createMachine(db, { gymNumber: ' N9 ', brand: 'Nautilus', model: 'Nitro Evo Leg Extension' })
+    const m = (await db.machines.get(id))!
+    expect(m).toMatchObject({ gymNumber: 'N9', brand: 'Nautilus', model: 'Nitro Evo Leg Extension' })
+    expect(id).not.toMatch(/^m-/)
+  })
+
+  it('refuses a gym number that already exists (any case) and an empty brand', async () => {
+    await expect(createMachine(db, { gymNumber: 'n6', brand: 'Nautilus', model: '' })).rejects.toThrow()
+    await expect(createMachine(db, { gymNumber: 'N20', brand: '  ', model: '' })).rejects.toThrow()
+    await expect(createMachine(db, { gymNumber: '', brand: 'gym80', model: '' })).rejects.toThrow()
+    expect(await db.machines.count()).toBe(12)
+  })
+})
+
+describe('createExercise', () => {
+  it('saves an exercise that can be put on a day and follows the progression rule', async () => {
+    const machineId = await createMachine(db, { gymNumber: 'N9', brand: 'Nautilus', model: 'Leg Extension' })
+    const id = await createExercise(db, {
+      name: ' Leg extension ',
+      machineId,
+      settings: 'seat 5',
+      loadType: 'stack',
+      primaryMuscles: ['quads'],
+      secondaryMuscles: ['quads', 'glutes'],
+      weightIncrementKg: 5,
+      cues: ['Toes up', ''],
+    })
+    const ex = (await db.exercises.get(id))!
+    expect(ex).toMatchObject({ name: 'Leg extension', machineId, settings: 'seat 5', loadType: 'stack', weightIncrementKg: 5 })
+    expect(ex.primaryMuscles).toEqual(['quads'])
+    expect(ex.secondaryMuscles).toEqual(['glutes']) // "quads" dropped: already primary
+    expect(ex.cues).toEqual(['Toes up'])
+
+    await updateDayTemplate(db, 'day-mon', { exerciseIds: ['ex-leg-press', id] })
+    await logThree(id, 'day-mon', WED, [[50, 12], [50, 11], [50, 10]])
+    const last = await getLastResult(db, id, { before: FRI })
+    expect(progression(last, ex)).toEqual({ kind: 'increase', fromKg: 50, suggestedKg: 55 })
+  })
+
+  it('works without a machine and uses the default step', async () => {
+    const id = await createExercise(db, { name: 'Push-up', loadType: 'bodyweight', primaryMuscles: ['chest'] })
+    const ex = (await db.exercises.get(id))!
+    expect(ex.machineId).toBeUndefined()
+    expect(ex.weightIncrementKg).toBe(2.5)
+  })
+
+  it('refuses bad input and saves nothing', async () => {
+    const base = { name: 'X', loadType: 'stack' as const, primaryMuscles: ['chest' as const] }
+    await expect(createExercise(db, { ...base, name: '  ' })).rejects.toThrow()
+    await expect(createExercise(db, { ...base, primaryMuscles: [] })).rejects.toThrow()
+    await expect(createExercise(db, { ...base, primaryMuscles: ['wings' as never] })).rejects.toThrow()
+    await expect(createExercise(db, { ...base, machineId: 'm-nope' })).rejects.toThrow()
+    await expect(createExercise(db, { ...base, weightIncrementKg: 0 })).rejects.toThrow()
+    await expect(createExercise(db, { ...base, loadType: 'rocket' as never })).rejects.toThrow()
+    expect(await db.exercises.count()).toBe(18)
   })
 })

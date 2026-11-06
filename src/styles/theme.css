@@ -962,3 +962,209 @@ section > .last-time {
   outline: 2px solid var(--soft);
   outline-offset: 1px;
 }
+
+/* ---------- Day editor ---------- */
+.edit-day-button {
+  display: block;
+  margin: 16px auto 0;
+}
+
+.day-editor-title {
+  margin: 4px 0 18px;
+  font-size: 2.2rem;
+}
+
+.edit-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.edit-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.edit-row .gym-number {
+  font-size: 1.6rem;
+}
+
+.edit-row .gym-number.small {
+  font-size: 1.1rem;
+}
+
+.edit-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-strong);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.icon-btn:disabled {
+  opacity: 0.3;
+}
+
+.add-exercise {
+  margin: 14px 0 18px;
+}
+
+.day-editor-actions {
+  position: sticky;
+  bottom: 0;
+  padding: 12px 0 calc(env(safe-area-inset-bottom) + 12px);
+  background: linear-gradient(to bottom, transparent, var(--bg) 35%);
+}
+
+/* Chips (muscles, load type) */
+.chips-field {
+  border: none;
+  padding: 0;
+  min-width: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.95rem;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--soft);
+  border-color: var(--soft);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+.chip:disabled {
+  opacity: 0.3;
+}
+
+/* Dropdown */
+.form-select {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgb(var(--frozen-rgb) / 0.06);
+  color: inherit;
+  font: inherit;
+  font-size: 1.05rem;
+}
+
+.form-select option {
+  background: var(--bg);
+}
+
+.new-machine {
+  margin: -6px 0 18px;
+  padding: 14px 14px 0;
+  border: 1px dashed rgb(var(--frozen-rgb) / 0.4);
+  border-radius: 14px;
+}
+
+/* Exercise picker */
+.picker-new {
+  margin-bottom: 12px;
+}
+
+.picker-search {
+  width: 100%;
+  min-height: var(--tap);
+  margin-bottom: 12px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgb(var(--frozen-rgb) / 0.06);
+  color: inherit;
+  font: inherit;
+  font-size: 1.05rem;
+}
+
+.picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.picker-item {
+  width: 100%;
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 4px;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+}
+
+.picker-item .gym-number {
+  font-size: 1.4rem;
+}
+
+.picker-item .gym-number.small {
+  font-size: 1rem;
+}
+
+.picker-item:disabled {
+  opacity: 0.5;
+}
+
+.picker-name {
+  font-weight: 600;
+}
+
+.picker-on-day {
+  font-size: 0.8rem;
+  color: var(--soft);
+}
+
+/* Tighter rows so exercise names have room next to the ↑ ↓ × buttons */
+.edit-row {
+  grid-template-columns: 50px minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.edit-row .gym-number.small {
+  font-size: 0.95rem;
+}
+
+.icon-btn {
+  width: 40px;
+}

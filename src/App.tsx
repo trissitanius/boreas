@@ -13,12 +13,14 @@ import { ExerciseList } from './components/ExerciseList'
 import { ExerciseLogger } from './components/ExerciseLogger'
 import { OtherDays } from './components/OtherDays'
 import { NextUpCard } from './components/NextUpCard'
+import { DayEditor } from './components/DayEditor'
 
 export function App() {
   const { date: today, weekday: todayWeekday } = useToday()
   /** null = follow today (also after midnight). A weekday = browsing another day. */
   const [otherWeekday, setOtherWeekday] = useState<Weekday | null>(null)
   const [exerciseId, setExerciseId] = useState<string | null>(null)
+  const [editingDay, setEditingDay] = useState(false)
 
   /** Opens an exercise (or goes back to the list with null), starting at the top of the screen. */
   function openExercise(id: string | null) {
@@ -64,6 +66,23 @@ export function App() {
   }, [data, template?.id, today])
 
   if (!data || !template) return <main className="app muted">{strings.loading}</main>
+
+  if (editingDay) {
+    return (
+      <main className="app">
+        <DayEditor
+          key={template.id}
+          template={template}
+          exercises={data.exercises}
+          machines={data.machines}
+          onClose={() => {
+            setEditingDay(false)
+            window.scrollTo(0, 0)
+          }}
+        />
+      </main>
+    )
+  }
 
   const exercise = exerciseId ? data.exercises.get(exerciseId) : undefined
   if (exercise) {
@@ -131,6 +150,17 @@ export function App() {
         nextWorkoutText={nextWorkoutText}
         onOpen={openExercise}
       />
+
+      <button
+        type="button"
+        className="btn btn-small edit-day-button"
+        onClick={() => {
+          setEditingDay(true)
+          window.scrollTo(0, 0)
+        }}
+      >
+        {strings.dayEditor.editDay}
+      </button>
 
       <OtherDays
         templates={data.templates}
