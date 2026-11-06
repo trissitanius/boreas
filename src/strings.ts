@@ -1,11 +1,23 @@
 // All text shown in the app, in one place so translations can be added later.
 export const strings = {
   appName: 'Boreas',
+  /** Used for dates, e.g. "Friday 6 November". */
+  locale: 'en-GB',
   loading: 'Loading…',
   weekdaysShort: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  weekdaysLong: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
   today: 'Today',
+  backToToday: '‹ Today',
+  otherDays: 'Other days',
   restDay: 'Rest day',
   restDayHint: 'Recover. Nothing to log.',
+  rest: 'Rest',
+  nextWorkout: (weekday: string, name: string) => `Next: ${weekday} · ${name}`,
+  tomorrow: 'tomorrow',
+  inDays: (n: number) => `in ${n} days`,
+  dayProgress: (done: number, total: number) => `${done} of ${total} done`,
+  exerciseDone: '✓ Done',
+  setCount: (logged: number, total: number) => `${logged}/${total}`,
   noMachine: 'Floor',
   back: '‹ Back',
   setLabel: (n: number) => `Set ${n}`,
@@ -18,5 +30,4 @@ export const strings = {
   invalidWeight: 'Enter a weight, e.g. 22.5',
   invalidReps: 'Enter whole reps, e.g. 10',
   saveFailed: 'Could not save. Try again.',
-  setsLoggedToday: (n: number, total: number) => `${n}/${total} sets today`,
 }

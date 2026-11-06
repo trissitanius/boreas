@@ -1,54 +1,63 @@
 import type { DayTemplate, Exercise, Machine, SetLog } from '../db/types'
 import { SETS_PER_EXERCISE } from '../db/repo'
+import { exerciseStatus, isRestDay } from '../lib/schedule'
 import { strings } from '../strings'
 
 interface Props {
   template: DayTemplate
   exercises: Map<string, Exercise>
   machines: Map<string, Machine>
-  todaysSets: SetLog[]
+  /** Sets logged today for this day. */
+  sets: SetLog[]
+  /** Shown on rest days, e.g. "Next: Friday · Arms (tomorrow)". */
+  nextWorkoutText?: string
   onOpen: (exerciseId: string) => void
 }
 
-export function ExerciseList({ template, exercises, machines, todaysSets, onOpen }: Props) {
-  if (template.exerciseIds.length === 0) {
+export function ExerciseList({ template, exercises, machines, sets, nextWorkoutText, onOpen }: Props) {
+  if (isRestDay(template)) {
     return (
-      <section>
-        <h2 className="day-name">{strings.restDay}</h2>
+      <section className="rest-day">
         <p className="muted">{strings.restDayHint}</p>
+        {nextWorkoutText && <p className="next-workout">{nextWorkoutText}</p>}
       </section>
     )
   }
 
   return (
-    <section>
-      <h2 className="day-name">{template.name}</h2>
-      <ul className="exercise-list">
-        {template.exerciseIds.map((id) => {
-          const exercise = exercises.get(id)
-          if (!exercise) return null
-          const machine = exercise.machineId ? machines.get(exercise.machineId) : undefined
-          const gymNumber = machine?.gymNumber ?? strings.noMachine
-          const logged = todaysSets.filter((s) => s.exerciseId === id).length
-          return (
-            <li key={id}>
-              <button type="button" className="exercise-card" onClick={() => onOpen(id)}>
-                <span className={`gym-number${gymNumber.length > 3 ? ' small' : ''}`}>{gymNumber}</span>
-                <span>
-                  <span className="exercise-name">
-                    {exercise.name}
-                    {exercise.variant && <span className="muted"> · {exercise.variant}</span>}
-                  </span>
-                  <br />
-                  <span className="exercise-meta">
-                    {logged > 0 ? strings.setsLoggedToday(logged, SETS_PER_EXERCISE) : exercise.settings}
-                  </span>
+    <ul className="exercise-list">
+      {template.exerciseIds.map((id) => {
+        const exercise = exercises.get(id)
+        if (!exercise) return null
+        const machine = exercise.machineId ? machines.get(exercise.machineId) : undefined
+        const gymNumber = machine?.gymNumber ?? strings.noMachine
+        const logged = exerciseStatus(sets, id)
+        const done = logged >= SETS_PER_EXERCISE
+        return (
+          <li key={id}>
+            <button
+              type="button"
+              className={`exercise-card${done ? ' is-done' : ''}`}
+              onClick={() => onOpen(id)}
+            >
+              <span className={`gym-number${gymNumber.length > 3 ? ' small' : ''}`}>{gymNumber}</span>
+              <span>
+                <span className="exercise-name">
+                  {exercise.name}
+                  {exercise.variant && <span className="muted"> · {exercise.variant}</span>}
                 </span>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
-    </section>
+                <br />
+                <span className="exercise-meta">{exercise.settings}</span>
+              </span>
+              {logged > 0 && (
+                <span className="exercise-status">
+                  {done ? strings.exerciseDone : strings.setCount(logged, SETS_PER_EXERCISE)}
+                </span>
+              )}
+            </button>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
