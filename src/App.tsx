@@ -75,7 +75,7 @@ export function App() {
         sub={rest ? undefined : strings.dayProgress(progress.done, progress.total)}
       >
         {!isToday && (
-          <button type="button" className="back-button glass-back" onClick={() => setOtherWeekday(null)}>
+          <button type="button" className="back-button page-back" onClick={() => setOtherWeekday(null)}>
             {strings.backToToday}
           </button>
         )}

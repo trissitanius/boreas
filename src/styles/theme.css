@@ -6,16 +6,19 @@
   --ember: #ff7a45;
 
   /* Same colors as r g b, for see-through versions */
+  --black-iris-rgb: 8 8 19;
   --frozen-rgb: 160 189 219;
+  --ember-rgb: 255 122 69;
   --deep-blue-rgb: 42 58 140;
-  --glass-base: #0e1124;
 
   --bg: var(--black-iris);
   --text: var(--off-white);
   --soft: var(--frozen);
   --accent: var(--ember);
-  --surface: rgb(160 189 219 / 0.08);
-  --border: rgb(160 189 219 / 0.22);
+  /* Dark see-through surface for cards and inputs, so numbers stay readable on the glass */
+  --surface: rgb(var(--black-iris-rgb) / 0.74);
+  --surface-strong: rgb(var(--black-iris-rgb) / 0.86);
+  --border: rgb(var(--frozen-rgb) / 0.24);
 
   --radius: 14px;
   --tap: 56px; /* minimum height for anything you tap */
@@ -56,79 +59,88 @@ button {
   padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 24px);
 }
 
-/* Fluted glass header: a blurred color blob seen through thin vertical ribs. CSS only. */
-.glass-header {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  margin-bottom: 16px;
-  padding: 18px 18px 16px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--glass-base);
-}
-
-/* The blob */
-.glass-header::before {
-  content: '';
-  position: absolute;
-  inset: -40%;
-  z-index: -2;
-  background:
-    radial-gradient(38% 48% at 28% 42%, rgb(var(--frozen-rgb) / 0.6), transparent 70%),
-    radial-gradient(34% 44% at 76% 62%, rgb(var(--deep-blue-rgb) / 0.75), transparent 70%);
-  filter: blur(26px);
-}
-
-/* The ribs: one layer of repeating highlight/shadow lines, blurring what is behind it */
-.glass-header::after {
-  content: '';
-  position: absolute;
+/* Fluted glass background (the whole screen). CSS only, no images.
+   A blurred color blob, a shifted copy of it seen through vertical stripes (the "bent" look of
+   reeded glass), and fine rib lines on top. It never moves and uses no backdrop-filter,
+   so the browser paints it once and scrolling stays smooth on cheap phones. */
+.backdrop {
+  position: fixed;
   inset: 0;
   z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--bg);
+}
+
+.backdrop-blob {
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(30% 24% at 24% 18%, rgb(var(--frozen-rgb) / 0.62), transparent 70%),
+    radial-gradient(36% 28% at 82% 30%, rgb(var(--deep-blue-rgb) / 1), transparent 72%),
+    radial-gradient(30% 22% at 18% 70%, rgb(var(--deep-blue-rgb) / 0.6), transparent 70%),
+    radial-gradient(20% 14% at 70% 62%, rgb(var(--frozen-rgb) / 0.22), transparent 70%),
+    radial-gradient(14% 9% at 92% 92%, rgb(var(--ember-rgb) / 0.22), transparent 70%);
+  filter: blur(36px);
+}
+
+/* The same blob, shifted and stretched, shown only through soft vertical bands */
+.backdrop-refract {
+  transform: translateX(4%) scaleX(1.12);
+  opacity: 0.9;
+  -webkit-mask-image: repeating-linear-gradient(90deg, transparent 0, #000 7px, transparent 14px);
+  mask-image: repeating-linear-gradient(90deg, transparent 0, #000 7px, transparent 14px);
+}
+
+/* Rib edges: a thin highlight and a soft shadow on every 14px rib */
+.backdrop-ribs {
+  position: absolute;
+  inset: 0;
   background: repeating-linear-gradient(
     90deg,
-    rgb(255 255 255 / 0.09) 0 1px,
-    rgb(255 255 255 / 0.02) 1px 4px,
-    rgb(0 0 0 / 0.16) 4px 7px,
-    rgb(255 255 255 / 0.04) 7px 8px
+    rgb(255 255 255 / 0.07) 0 1px,
+    rgb(255 255 255 / 0.015) 1px 6px,
+    rgb(0 0 0 / 0.2) 6px 12px,
+    rgb(255 255 255 / 0.03) 12px 14px
   );
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 
-/* Fallback when backdrop-filter is missing: same look, a bit calmer */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass-header::before {
-    opacity: 0.7;
-  }
+/* Darker toward the bottom, where the lists are */
+.backdrop-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 25%, rgb(var(--black-iris-rgb) / 0.55) 75%, rgb(var(--black-iris-rgb) / 0.75));
 }
 
-.glass-kicker {
+/* Page header: big text straight on the glass */
+.page-header {
+  padding: 10px 2px 18px;
+  text-shadow: 0 1px 14px rgb(var(--black-iris-rgb) / 0.6);
+}
+
+.page-kicker {
   margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text);
-  opacity: 0.85;
-}
-
-.glass-title {
-  margin: 2px 0 0;
-  font-size: 2.4rem;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-}
-
-.glass-sub {
-  margin: 6px 0 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text);
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
-.glass-back {
-  margin: -8px 0 4px -4px;
+.page-title {
+  margin: 2px 0 0;
+  font-size: 2.9rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.page-sub {
+  margin: 8px 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.page-back {
+  margin: -6px 0 2px -4px;
   color: var(--text);
 }
 
@@ -168,7 +180,7 @@ button {
   padding: 6px 2px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: transparent;
+  background: var(--surface);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -307,6 +319,7 @@ button {
   padding: 4px 10px;
   border: 1px solid var(--border);
   border-radius: 999px;
+  background: var(--surface);
   font-size: 0.9rem;
   color: var(--soft);
 }
@@ -343,7 +356,7 @@ button {
   padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: var(--surface);
+  background: var(--surface-strong);
   font-size: 1.6rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -365,7 +378,7 @@ button {
   padding: 0 16px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: transparent;
+  background: var(--surface);
   font-weight: 700;
 }
 

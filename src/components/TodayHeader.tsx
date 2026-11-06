@@ -9,14 +9,14 @@ interface Props {
   children?: ReactNode
 }
 
-/** App header with the fluted glass look (CSS only, see .glass-header in theme.css). */
+/** Big header text, straight on the fluted glass background. */
 export function TodayHeader({ kicker, title, sub, children }: Props) {
   return (
-    <header className="glass-header">
+    <header className="page-header">
       {children}
-      <p className="glass-kicker">{kicker}</p>
-      <h1 className="glass-title">{title}</h1>
-      {sub && <p className="glass-sub">{sub}</p>}
+      <p className="page-kicker">{kicker}</p>
+      <h1 className="page-title">{title}</h1>
+      {sub && <p className="page-sub">{sub}</p>}
     </header>
   )
 }
