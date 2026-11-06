@@ -168,3 +168,53 @@ export async function getLastResult(
     sets: sets.map((s) => ({ setNumber: s.setNumber, weightKg: s.weightKg, reps: s.reps })),
   }
 }
+
+export const LIMITS = {
+  settingsLength: 200,
+  cueLength: 120,
+  cueCount: 12,
+  minIncrementKg: 0.1,
+  maxIncrementKg: 50,
+}
+
+export interface ExerciseChanges {
+  settings?: string
+  cues?: string[]
+  weightIncrementKg?: number
+}
+
+/** Tidies cues: trimmed, no empty ones, no duplicates, capped in number and length. */
+export function cleanCues(cues: string[]): string[] {
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const raw of cues) {
+    const cue = raw.trim().slice(0, LIMITS.cueLength)
+    const key = cue.toLowerCase()
+    if (!cue || seen.has(key)) continue
+    seen.add(key)
+    result.push(cue)
+    if (result.length === LIMITS.cueCount) break
+  }
+  return result
+}
+
+/** Saves an exercise's settings, cues and/or weight step. Throws (and saves nothing) on invalid input. */
+export async function updateExercise(db: BoreasDB, id: string, changes: ExerciseChanges): Promise<void> {
+  const step = changes.weightIncrementKg
+  if (
+    step !== undefined &&
+    !(Number.isFinite(step) && step >= LIMITS.minIncrementKg && step <= LIMITS.maxIncrementKg)
+  ) {
+    throw new Error(`Invalid weight step: ${step}`)
+  }
+  await db.transaction('rw', db.exercises, async () => {
+    const exercise = await db.exercises.get(id)
+    if (!exercise) throw new Error(`Unknown exercise: ${id}`)
+    await db.exercises.update(id, {
+      ...(changes.settings !== undefined ? { settings: changes.settings.trim().slice(0, LIMITS.settingsLength) } : {}),
+      ...(changes.cues !== undefined ? { cues: cleanCues(changes.cues) } : {}),
+      ...(step !== undefined ? { weightIncrementKg: step } : {}),
+      updatedAt: Math.max(Date.now(), exercise.updatedAt + 1),
+    })
+  })
+}

@@ -1,6 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { BoreasDB } from './db'
-import { deleteSet, getLastResult, getOrCreateSession, getSetsForDay, logSet, updateSet } from './repo'
+import {
+  cleanCues,
+  deleteSet,
+  getLastResult,
+  getOrCreateSession,
+  getSetsForDay,
+  LIMITS,
+  logSet,
+  updateExercise,
+  updateSet,
+} from './repo'
+import { progression } from '../lib/progression'
 import { createTestDb } from '../test/testDb'
 
 const WED = '2026-11-04' // a Wednesday (Pull)
@@ -196,5 +207,61 @@ describe('getLastResult with "before" (last time ignores today)', () => {
 
     const last = await getLastResult(db, 'ex-dumbbell-curl', { before: TODAY })
     expect(last?.date).toBe(FRI)
+  })
+})
+
+describe('updateExercise (feature 6)', () => {
+  it('saves settings, cues and weight step', async () => {
+    const before = (await db.exercises.get('ex-butterfly'))!
+    await updateExercise(db, 'ex-butterfly', {
+      settings: '  seat 4; plate behind the back  ',
+      cues: ['Proud chest', 'Squeeze 1 s'],
+      weightIncrementKg: 4,
+    })
+    const after = (await db.exercises.get('ex-butterfly'))!
+    expect(after.settings).toBe('seat 4; plate behind the back')
+    expect(after.cues).toEqual(['Proud chest', 'Squeeze 1 s'])
+    expect(after.weightIncrementKg).toBe(4)
+    expect(after.updatedAt).toBeGreaterThan(before.updatedAt)
+    // untouched fields stay
+    expect(after.name).toBe(before.name)
+    expect(after.primaryMuscles).toEqual(before.primaryMuscles)
+  })
+
+  it('only changes what is given', async () => {
+    await updateExercise(db, 'ex-chest-press', { settings: 'seat height 6, back 4' })
+    const after = (await db.exercises.get('ex-chest-press'))!
+    expect(after.settings).toBe('seat height 6, back 4')
+    expect(after.cues).toEqual(['Banana'])
+    expect(after.weightIncrementKg).toBe(2.5)
+  })
+
+  it('tidies cues: trimmed, no empties, no duplicates, capped', () => {
+    expect(cleanCues(['  Banana ', '', '   ', 'banana', 'Proud chest'])).toEqual(['Banana', 'Proud chest'])
+    expect(cleanCues(Array.from({ length: 20 }, (_, i) => `cue ${i}`))).toHaveLength(LIMITS.cueCount)
+    expect(cleanCues(['x'.repeat(500)])[0]).toHaveLength(LIMITS.cueLength)
+  })
+
+  it('refuses invalid weight steps and saves nothing', async () => {
+    for (const weightIncrementKg of [0, -2.5, 51, NaN, Infinity]) {
+      await expect(
+        updateExercise(db, 'ex-leg-curl', { settings: 'changed', weightIncrementKg }),
+      ).rejects.toThrow()
+    }
+    const after = (await db.exercises.get('ex-leg-curl'))!
+    expect(after.settings).toBe('foot pad 9, foot pad arm 11')
+    expect(after.weightIncrementKg).toBe(2.5)
+  })
+
+  it('refuses unknown exercises', async () => {
+    await expect(updateExercise(db, 'ex-nope', { settings: 'x' })).rejects.toThrow()
+  })
+
+  it('a new weight step changes the next suggestion (step 2: 14 kg → 16 kg)', async () => {
+    await logThree('ex-dumbbell-curl', 'day-wed', WED, [[14, 12], [14, 11], [14, 10]])
+    await updateExercise(db, 'ex-dumbbell-curl', { weightIncrementKg: 2 })
+    const curl = (await db.exercises.get('ex-dumbbell-curl'))!
+    const last = await getLastResult(db, curl.id, { before: FRI })
+    expect(progression(last, curl)).toEqual({ kind: 'increase', fromKg: 14, suggestedKg: 16 })
   })
 })

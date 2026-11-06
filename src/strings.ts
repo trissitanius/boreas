@@ -46,6 +46,25 @@ export const strings = {
   invalidReps: 'Enter whole reps, e.g. 10',
   saveFailed: 'Could not save. Try again.',
 
+  editSettings: 'Edit',
+  noSettings: 'No settings yet',
+
+  // Exercise editor (settings, cues, weight step)
+  editor: {
+    title: (name: string) => `Edit ${name}`,
+    settings: 'Settings',
+    settingsPlaceholder: 'e.g. seat 4, back pad 2',
+    step: 'Weight step (kg)',
+    stepHint: 'What “Increase weight” adds, e.g. 2.5, 4 or 1.',
+    invalidStep: 'Enter a weight step between 0.1 and 50 kg.',
+    cues: 'Cues',
+    newCue: 'New cue, e.g. Proud chest',
+    addCue: 'Add',
+    removeCue: (cue: string) => `Remove “${cue}”`,
+    duplicateCue: 'That cue is already in the list.',
+    tooManyCues: 'That’s the maximum number of cues.',
+  },
+
   // Welcome page (the website)
   landing: {
     eyebrow: 'Workout tracker',

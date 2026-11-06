@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { Sheet } from '../components/Sheet'
 import { strings } from '../strings'
 
 interface Props {
@@ -38,44 +38,25 @@ function MenuIcon() {
 }
 
 export function InstallGuide({ mode, onClose }: Props) {
-  const closeRef = useRef<HTMLButtonElement>(null)
   const ios = mode === 'ios'
   const steps = ios ? t.iosSteps : t.manualSteps
   const icons = ios ? [<ShareIcon />, <AddIcon />, null] : [<MenuIcon />, <AddIcon />, null]
 
-  useEffect(() => {
-    closeRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   return (
-    <div className="guide-overlay" onClick={onClose}>
-      <div
-        className="guide-sheet"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="guide-title"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 id="guide-title" className="guide-title">
-          {ios ? t.iosTitle : t.manualTitle}
-        </h2>
-        <ol className="guide-steps">
-          {steps.map((step, i) => (
-            <li key={step}>
-              <span className="guide-step-number">{i + 1}</span>
-              <span className="guide-step-text">{step}</span>
-              {icons[i]}
-            </li>
-          ))}
-        </ol>
-        <p className="guide-note">{ios ? t.iosNote : t.manualNote}</p>
-        <button ref={closeRef} type="button" className="btn guide-close" onClick={onClose}>
-          {t.close}
-        </button>
-      </div>
-    </div>
+    <Sheet title={ios ? t.iosTitle : t.manualTitle} onClose={onClose}>
+      <ol className="guide-steps">
+        {steps.map((step, i) => (
+          <li key={step}>
+            <span className="guide-step-number">{i + 1}</span>
+            <span className="guide-step-text">{step}</span>
+            {icons[i]}
+          </li>
+        ))}
+      </ol>
+      <p className="guide-note">{ios ? t.iosNote : t.manualNote}</p>
+      <button type="button" className="btn sheet-wide-button" onClick={onClose}>
+        {t.close}
+      </button>
+    </Sheet>
   )
 }

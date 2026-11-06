@@ -518,7 +518,7 @@ button {
 }
 
 /* Install guide: a sheet that slides up from the bottom */
-.guide-overlay {
+.sheet-overlay {
   position: fixed;
   inset: 0;
   z-index: 20;
@@ -528,7 +528,7 @@ button {
   background: rgb(var(--black-iris-rgb) / 0.6);
 }
 
-.guide-sheet {
+.sheet-panel {
   width: 100%;
   max-width: 520px;
   padding: 24px 20px calc(env(safe-area-inset-bottom) + 20px);
@@ -547,12 +547,12 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .guide-sheet {
+  .sheet-panel {
     animation: none;
   }
 }
 
-.guide-title {
+.sheet-title {
   margin: 0 0 16px;
   font-size: 1.4rem;
 }
@@ -594,7 +594,7 @@ button {
   color: var(--soft);
 }
 
-.guide-close {
+.sheet-wide-button {
   width: 100%;
 }
 
@@ -822,4 +822,143 @@ section > .last-time {
 
 .set-row + .set-row {
   margin-top: 4px;
+}
+
+/* ---------- Machine line + exercise editor ---------- */
+.machine-line {
+  margin: -2px 0 6px;
+  font-size: 0.9rem;
+  color: var(--soft);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-row .settings-line {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.settings-row + .last-time {
+  margin-top: 10px;
+}
+
+.sheet-panel {
+  max-height: 92dvh;
+  overflow-y: auto;
+}
+
+.form-field {
+  margin-bottom: 18px;
+}
+
+.form-field label,
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--soft);
+}
+
+.form-field input,
+.cue-add input {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgb(var(--frozen-rgb) / 0.06);
+  font-size: 1.1rem;
+}
+
+.form-field input:focus,
+.cue-add input:focus {
+  outline: 2px solid var(--soft);
+  outline-offset: 1px;
+}
+
+.form-field .form-number {
+  max-width: 140px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.form-hint {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--soft);
+}
+
+.form-error {
+  margin: 0 0 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.cue-edit-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.cue-edit-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 4px 4px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.cue-remove {
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--soft);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.cue-add {
+  display: flex;
+  gap: 8px;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+}
+
+.sheet-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.form-field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgb(var(--frozen-rgb) / 0.06);
+  font: inherit;
+  font-size: 1.1rem;
+  color: inherit;
+  resize: vertical;
+}
+
+.form-field textarea:focus {
+  outline: 2px solid var(--soft);
+  outline-offset: 1px;
 }

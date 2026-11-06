@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { db } from '../db/db'
 import { deleteSet, logSet, SETS_PER_EXERCISE } from '../db/repo'
 import type { Exercise, Machine, SetLog } from '../db/types'
@@ -9,6 +9,7 @@ import { progression } from '../lib/progression'
 import { useLastResult } from '../lib/useLastResult'
 import { strings } from '../strings'
 import { LastTime } from './LastTime'
+import { ExerciseEditor } from './ExerciseEditor'
 
 interface Props {
   exercise: Exercise
@@ -29,6 +30,8 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
   const flag = ready ? progression(last ?? undefined, exercise) : undefined
   const setNumbers = Array.from({ length: SETS_PER_EXERCISE }, (_, i) => i + 1)
   const currentSet = setNumbers.find((n) => !sets.some((s) => s.setNumber === n))
+  const [editorOpen, setEditorOpen] = useState(false)
+  const closeEditor = useCallback(() => setEditorOpen(false), [])
 
   return (
     <section>
@@ -42,7 +45,17 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
           {exercise.variant && <span className="muted"> · {exercise.variant}</span>}
         </h2>
       </div>
-      {exercise.settings && <p className="settings-line">{exercise.settings}</p>}
+      {machine && (
+        <p className="machine-line">
+          {machine.brand} · {machine.model}
+        </p>
+      )}
+      <div className="settings-row">
+        <p className={`settings-line${exercise.settings ? '' : ' muted'}`}>{exercise.settings || strings.noSettings}</p>
+        <button type="button" className="btn btn-small" onClick={() => setEditorOpen(true)}>
+          {strings.editSettings}
+        </button>
+      </div>
       <LastTime exercise={exercise} today={date} />
       {exercise.cues.length > 0 && (
         <ul className="cues">
@@ -70,6 +83,7 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
           {next ? strings.nextExercise(next.name) : strings.allDoneBack}
         </button>
       )}
+      {editorOpen && <ExerciseEditor exercise={exercise} onClose={closeEditor} />}
     </section>
   )
 }
