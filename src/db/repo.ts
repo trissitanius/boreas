@@ -384,3 +384,56 @@ export async function createExercise(db: BoreasDB, input: NewExercise): Promise<
     return id
   })
 }
+
+export interface HistoryEntry {
+  sessionId: string
+  date: string
+  dayTemplateId: string
+  dayName: string
+  /** In the order you logged them; each with its sets in set order. */
+  exercises: { exerciseId: string; sets: { setNumber: number; weightKg: number | null; reps: number }[] }[]
+}
+
+/** Every workout with at least one set, newest date first (for the History screen). */
+export async function getHistory(db: BoreasDB): Promise<HistoryEntry[]> {
+  const [sessions, logs, templates] = await Promise.all([
+    db.sessions.toArray(),
+    db.setLogs.toArray(),
+    db.dayTemplates.toArray(),
+  ])
+  const dayNames = new Map(templates.map((t) => [t.id, t.name]))
+  const logsBySession = new Map<string, SetLog[]>()
+  for (const log of logs) {
+    const list = logsBySession.get(log.sessionId)
+    if (list) list.push(log)
+    else logsBySession.set(log.sessionId, [log])
+  }
+
+  const entries: (HistoryEntry & { lastLogAt: number })[] = []
+  for (const session of sessions) {
+    const sessionLogs = logsBySession.get(session.id)
+    if (!sessionLogs || sessionLogs.length === 0) continue
+    sessionLogs.sort((a, b) => a.loggedAt - b.loggedAt)
+    const byExercise = new Map<string, SetLog[]>()
+    for (const log of sessionLogs) {
+      const list = byExercise.get(log.exerciseId)
+      if (list) list.push(log)
+      else byExercise.set(log.exerciseId, [log])
+    }
+    entries.push({
+      sessionId: session.id,
+      date: session.date,
+      dayTemplateId: session.dayTemplateId,
+      dayName: dayNames.get(session.dayTemplateId) ?? '',
+      exercises: [...byExercise].map(([exerciseId, sets]) => ({
+        exerciseId,
+        sets: sets
+          .sort((a, b) => a.setNumber - b.setNumber)
+          .map((s) => ({ setNumber: s.setNumber, weightKg: s.weightKg, reps: s.reps })),
+      })),
+      lastLogAt: sessionLogs[sessionLogs.length - 1].loggedAt,
+    })
+  }
+  entries.sort((a, b) => b.date.localeCompare(a.date) || b.lastLogAt - a.lastLogAt)
+  return entries.map(({ lastLogAt: _, ...entry }) => entry)
+}

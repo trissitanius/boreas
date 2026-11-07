@@ -32,3 +32,15 @@ export function daysBetween(fromIso: string, toIso: string): number {
   }
   return Math.round((toDate(toIso) - toDate(fromIso)) / 86_400_000)
 }
+
+/** "2026-11-06" → 5 (Friday). 1 = Monday … 7 = Sunday */
+export function weekdayOfISO(isoDate: string): Weekday {
+  const [y, m, d] = isoDate.split('-').map(Number)
+  return weekdayOf(new Date(y, m - 1, d))
+}
+
+/** "2026-11-06" + -1 → "2026-11-05" (calendar days, local time). */
+export function addDays(isoDate: string, days: number): string {
+  const [y, m, d] = isoDate.split('-').map(Number)
+  return toISODate(new Date(y, m - 1, d + days))
+}

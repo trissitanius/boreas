@@ -151,6 +151,21 @@ export const strings = {
     calves: 'Calves',
   } satisfies Record<Muscle, string>,
 
+  // History: past workouts, and logging a past date
+  history: {
+    button: 'History',
+    title: 'History',
+    logPast: 'Log a past workout',
+    logPastHint: 'Pick the date, then log it like a normal day.',
+    open: 'Open',
+    futureDate: 'That date hasn’t happened yet.',
+    logged: 'Logged workouts',
+    empty: 'Nothing logged yet.',
+    pastLabel: 'Past workout',
+    backToToday: 'Back to today',
+    removedExercise: 'Removed exercise',
+  },
+
   // Muscle map
   muscleMap: {
     label: (primary: string, secondary: string) => `Primary: ${primary}. Secondary: ${secondary}.`,

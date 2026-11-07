@@ -5,6 +5,7 @@ import {
   createExercise,
   createMachine,
   deleteSet,
+  getHistory,
   getLastResult,
   getOrCreateSession,
   getSetsForDay,
@@ -423,5 +424,69 @@ describe('setWeightForToday', () => {
     expect(await setWeightForToday(db, { exerciseId: 'ex-leg-raise', dayTemplateId: 'day-mon', date: WED, weightKg: 10 })).toBe(0)
     expect((await getSetsForDay(db, WED, 'day-mon'))[0].weightKg).toBeNull()
     expect(await setWeightForToday(db, { exerciseId: 'ex-dumbbell-curl', dayTemplateId: 'day-fri', date: FRI, weightKg: 10 })).toBe(0)
+  })
+})
+
+describe('getHistory', () => {
+  it('is empty without any sets', async () => {
+    expect(await getHistory(db)).toEqual([])
+  })
+
+  it('lists workouts newest first, with the day name and each exercise\'s sets in order', async () => {
+    await logThree('ex-dumbbell-curl', 'day-wed', WED, [[14, 13], [14, 12], [14, 10]])
+    await logThree('ex-preacher-curl', 'day-fri', FRI, [[30, 12], [30, 11], [30, 10]])
+    for (const [i, reps] of [9, 8, 7].entries()) {
+      await logSet(db, { exerciseId: 'ex-dumbbell-curl', dayTemplateId: 'day-fri', date: FRI, setNumber: i + 1, weightKg: 16, reps, loggedAt: at(FRI, 10 + i) })
+    }
+
+    const history = await getHistory(db)
+    expect(history.map((h) => [h.date, h.dayName])).toEqual([
+      [FRI, 'Arms'],
+      [WED, 'Pull'],
+    ])
+    expect(history[0].exercises.map((e) => e.exerciseId)).toEqual(['ex-preacher-curl', 'ex-dumbbell-curl'])
+    expect(history[0].exercises[1].sets).toEqual([
+      { setNumber: 1, weightKg: 16, reps: 9 },
+      { setNumber: 2, weightKg: 16, reps: 8 },
+      { setNumber: 3, weightKg: 16, reps: 7 },
+    ])
+  })
+
+  it('sorts sets by set number even when logged out of order', async () => {
+    await logSet(db, { exerciseId: 'ex-leg-curl', dayTemplateId: 'day-mon', date: WED, setNumber: 2, weightKg: 40, reps: 9, loggedAt: at(WED, 1) })
+    await logSet(db, { exerciseId: 'ex-leg-curl', dayTemplateId: 'day-mon', date: WED, setNumber: 1, weightKg: 40, reps: 11, loggedAt: at(WED, 2) })
+    const [entry] = await getHistory(db)
+    expect(entry.exercises[0].sets.map((s) => s.setNumber)).toEqual([1, 2])
+  })
+
+  it('skips workouts whose sets were all deleted', async () => {
+    const log = await logSet(db, { exerciseId: 'ex-leg-curl', dayTemplateId: 'day-mon', date: WED, setNumber: 1, weightKg: 40, reps: 10 })
+    await deleteSet(db, log.id)
+    expect(await db.sessions.count()).toBe(1)
+    expect(await getHistory(db)).toEqual([])
+  })
+})
+
+describe('logging a past date', () => {
+  const THU = '2026-11-05'
+
+  it('entering an older workout later never replaces a newer "last time"', async () => {
+    // Friday logged first, then last Wednesday's workout entered afterwards (newer loggedAt).
+    await logThree('ex-dumbbell-curl', 'day-fri', FRI, [[16, 9], [16, 8], [16, 7]])
+    for (const [i, reps] of [13, 12, 10].entries()) {
+      await logSet(db, { exerciseId: 'ex-dumbbell-curl', dayTemplateId: 'day-wed', date: WED, setNumber: i + 1, weightKg: 14, reps })
+    }
+    expect((await getLastResult(db, 'ex-dumbbell-curl'))?.date).toBe(FRI)
+    expect((await getLastResult(db, 'ex-dumbbell-curl', { before: '2026-11-07' }))?.date).toBe(FRI)
+  })
+
+  it('seen from a date in between, "last time" is the workout before that date', async () => {
+    await logThree('ex-dumbbell-curl', 'day-fri', FRI, [[16, 9], [16, 8], [16, 7]])
+    await logThree('ex-dumbbell-curl', 'day-wed', WED, [[14, 13], [14, 12], [14, 10]])
+    const last = await getLastResult(db, 'ex-dumbbell-curl', { before: THU })
+    expect(last?.date).toBe(WED)
+    expect(progression(last, { loadType: 'dumbbell', weightIncrementKg: 2.5 })).toEqual(
+      expect.objectContaining({ kind: 'increase' }),
+    )
   })
 })
