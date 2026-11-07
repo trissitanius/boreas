@@ -48,6 +48,11 @@ export const strings = {
   invalidWeight: 'Enter a weight, e.g. 22.5',
   invalidReps: 'Enter whole reps, e.g. 10',
   saveFailed: 'Could not save. Try again.',
+  saveSet: 'Save set',
+  lastTimeReps: (n: number) => `Last time: ${n}`,
+  addRep: 'One more rep',
+  removeRep: 'One rep less',
+  sameWeightAllSets: 'Same for all 3 sets',
 
   editSettings: 'Edit',
   noSettings: 'No settings yet',

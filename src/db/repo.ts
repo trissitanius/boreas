@@ -111,6 +111,30 @@ export async function updateSet(
   })
 }
 
+/**
+ * All sets of an exercise on one day share one weight: changing it updates that exercise's sets
+ * in this day's session (older sessions are never touched). Does nothing for bodyweight exercises.
+ * Returns how many sets changed.
+ */
+export async function setWeightForToday(
+  db: BoreasDB,
+  input: { exerciseId: string; dayTemplateId: string; date: string; weightKg: number },
+): Promise<number> {
+  return db.transaction('rw', db.sessions, db.setLogs, db.exercises, async () => {
+    const exercise = await db.exercises.get(input.exerciseId)
+    if (!exercise) throw new Error(`Unknown exercise: ${input.exerciseId}`)
+    if (exercise.loadType === 'bodyweight') return 0
+    checkWeight(input.weightKg, false)
+    const session = await db.sessions.where('[date+dayTemplateId]').equals([input.date, input.dayTemplateId]).first()
+    if (!session) return 0
+    return db.setLogs
+      .where('sessionId')
+      .equals(session.id)
+      .filter((s) => s.exerciseId === input.exerciseId && s.weightKg !== input.weightKg)
+      .modify({ weightKg: input.weightKg, updatedAt: Date.now() })
+  })
+}
+
 export async function deleteSet(db: BoreasDB, id: string): Promise<void> {
   await db.setLogs.delete(id)
 }

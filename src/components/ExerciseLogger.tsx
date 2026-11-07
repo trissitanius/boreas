@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { db } from '../db/db'
-import { deleteSet, logSet, SETS_PER_EXERCISE } from '../db/repo'
+import { deleteSet, logSet, SETS_PER_EXERCISE, setWeightForToday, updateSet } from '../db/repo'
 import type { Exercise, Machine, SetLog } from '../db/types'
 import { formatNumber } from '../lib/format'
 import { parseReps, parseWeight } from '../lib/parse'
-import { defaultWeight } from '../lib/prefill'
+import { defaultReps, weightForToday } from '../lib/prefill'
 import { progression } from '../lib/progression'
 import { useLastResult } from '../lib/useLastResult'
 import { strings } from '../strings'
@@ -12,6 +12,7 @@ import { LastTime } from './LastTime'
 import { ExerciseEditor } from './ExerciseEditor'
 import { LazyBodyMap } from './LazyBodyMap'
 import { MuscleSheet } from './MuscleSheet'
+import { RepCounter } from './RepCounter'
 import { useBodyModel } from '../lib/useBodyModel'
 
 interface Props {
@@ -31,6 +32,7 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
   const last = useLastResult(exercise.id, date)
   const ready = last !== undefined
   const flag = ready ? progression(last ?? undefined, exercise) : undefined
+  const bodyweight = exercise.loadType === 'bodyweight'
   const setNumbers = Array.from({ length: SETS_PER_EXERCISE }, (_, i) => i + 1)
   const currentSet = setNumbers.find((n) => !sets.some((s) => s.setNumber === n))
   const [editorOpen, setEditorOpen] = useState(false)
@@ -38,6 +40,29 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
   const [musclesOpen, setMusclesOpen] = useState(false)
   const closeMuscles = useCallback(() => setMusclesOpen(false), [])
   const [bodyModel] = useBodyModel()
+
+  // One weight for all 3 sets, pre-filled until you type your own.
+  const todayKg = ready ? weightForToday({ todaysSets: sets, last: last ?? undefined, flag, exercise }) : undefined
+  const [weight, setWeight] = useState('')
+  const [weightTouched, setWeightTouched] = useState(false)
+  const [weightError, setWeightError] = useState<string | null>(null)
+  useEffect(() => {
+    if (!weightTouched) setWeight(todayKg !== undefined ? formatNumber(todayKg) : '')
+  }, [todayKg, weightTouched])
+  /** null = bodyweight (no weight), undefined = not a valid weight yet. */
+  const weightKg = bodyweight ? null : parseWeight(weight)
+
+  // Changing the weight after logging sets changes today's logged sets too.
+  async function commitWeight() {
+    if (bodyweight || sets.length === 0) return
+    if (weightKg === undefined || weightKg === null) return setWeightError(strings.invalidWeight)
+    setWeightError(null)
+    try {
+      await setWeightForToday(db, { exerciseId: exercise.id, dayTemplateId, date, weightKg })
+    } catch {
+      setWeightError(strings.saveFailed)
+    }
+  }
 
   return (
     <section>
@@ -70,20 +95,50 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
           ))}
         </ul>
       )}
-      {setNumbers.map((n) => (
-        <SetRow
-          key={`${exercise.id}-${n}`}
-          setNumber={n}
-          exercise={exercise}
-          dayTemplateId={dayTemplateId}
-          date={date}
-          saved={sets.find((s) => s.setNumber === n)}
-          isCurrent={n === currentSet}
-          defaultKg={
-            ready ? defaultWeight({ setNumber: n, todaysSets: sets, last: last ?? undefined, flag, exercise }) : undefined
-          }
-        />
-      ))}
+
+      {!bodyweight && (
+        <div className="weight-row">
+          <label htmlFor={`w-${exercise.id}`}>
+            {strings.weight} ({strings.kg})
+            <span className="weight-hint">{strings.sameWeightAllSets}</span>
+          </label>
+          <input
+            id={`w-${exercise.id}`}
+            className="weight-input"
+            inputMode="decimal"
+            enterKeyHint="done"
+            autoComplete="off"
+            value={weight}
+            onFocus={(e) => e.currentTarget.select()}
+            onChange={(e) => {
+              setWeight(e.target.value)
+              setWeightTouched(true)
+              setWeightError(null)
+            }}
+            onBlur={() => void commitWeight()}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+          />
+        </div>
+      )}
+      {weightError && <p className="set-error weight-error">{weightError}</p>}
+
+      {setNumbers.map((n) => {
+        const lastSet = last?.sets.find((s) => s.setNumber === n)
+        return (
+          <SetRow
+            key={`${exercise.id}-${n}`}
+            setNumber={n}
+            exercise={exercise}
+            dayTemplateId={dayTemplateId}
+            date={date}
+            saved={sets.find((s) => s.setNumber === n)}
+            isCurrent={n === currentSet}
+            weightKg={weightKg}
+            startReps={ready ? defaultReps(n, last ?? undefined) : undefined}
+            lastReps={lastSet?.reps}
+          />
+        )
+      })}
       {currentSet === undefined && (
         <button type="button" className="btn btn-primary btn-next" onClick={onNext}>
           {next ? strings.nextExercise(next.name) : strings.allDoneBack}
@@ -119,51 +174,57 @@ interface SetRowProps {
   dayTemplateId: string
   date: string
   saved?: SetLog
-  /** The first set not logged yet: highlighted. */
+  /** The first set not logged yet: shows the rep counter. */
   isCurrent: boolean
-  /** Pre-filled weight for an unlogged set (see lib/prefill.ts). */
-  defaultKg?: number
+  /** The exercise's one weight for today (null = bodyweight, undefined = not valid yet). */
+  weightKg: number | null | undefined
+  /** Where the rep counter starts (see lib/prefill.ts). */
+  startReps?: number
+  /** This set's reps last time, shown as a hint. */
+  lastReps?: number
 }
 
-function SetRow({ setNumber, exercise, dayTemplateId, date, saved, isCurrent, defaultKg }: SetRowProps) {
-  const bodyweight = exercise.loadType === 'bodyweight'
+function SetRow({ setNumber, exercise, dayTemplateId, date, saved, isCurrent, weightKg, startReps, lastReps }: SetRowProps) {
   const [editing, setEditing] = useState(false)
-  const [weight, setWeight] = useState('')
-  const [weightTouched, setWeightTouched] = useState(false)
   const [reps, setReps] = useState('')
+  const [repsTouched, setRepsTouched] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const repsRef = useRef<HTMLInputElement>(null)
 
-  // An open set shows the pre-filled weight, unless you've already typed one.
+  // An open set starts at last time's reps, unless you've already changed it.
   useEffect(() => {
-    if (!saved && !weightTouched) setWeight(defaultKg !== undefined ? formatNumber(defaultKg) : '')
-  }, [saved, weightTouched, defaultKg])
+    if (!saved && !repsTouched && startReps !== undefined) setReps(String(startReps))
+  }, [saved, repsTouched, startReps])
 
   // When a set is deleted, start fresh.
   useEffect(() => {
     if (!saved) {
-      setReps('')
-      setWeightTouched(false)
+      setRepsTouched(false)
       setEditing(false)
     }
   }, [saved])
 
   function startEditing(log: SetLog) {
-    setWeight(log.weightKg !== null ? formatNumber(log.weightKg) : '')
     setReps(String(log.reps))
     setError(null)
     setEditing(true)
   }
 
   async function save() {
-    const weightKg = bodyweight ? null : parseWeight(weight)
-    if (weightKg === undefined) return setError(strings.invalidWeight)
     const repCount = parseReps(reps)
     if (repCount === undefined) return setError(strings.invalidReps)
-    setError(null)
     try {
+      if (saved) {
+        // Editing a logged set changes only its reps; the weight lives in the field above.
+        await updateSet(db, saved.id, { reps: repCount })
+        setError(null)
+        setEditing(false)
+        return
+      }
+      if (weightKg === undefined) return setError(strings.invalidWeight)
+      setError(null)
       await logSet(db, { exerciseId: exercise.id, dayTemplateId, date, setNumber, weightKg, reps: repCount })
-      setEditing(false)
+      // Keep every set of today on the same weight.
+      if (weightKg !== null) await setWeightForToday(db, { exerciseId: exercise.id, dayTemplateId, date, weightKg })
     } catch {
       setError(strings.saveFailed)
     }
@@ -191,55 +252,35 @@ function SetRow({ setNumber, exercise, dayTemplateId, date, saved, isCurrent, de
     )
   }
 
-  const id = `${exercise.id}-${setNumber}`
+  // Not your turn yet: one quiet line.
+  if (!isCurrent && !editing) {
+    return (
+      <div className="set-row is-upcoming">
+        <span className="set-number">{strings.setLabel(setNumber)}</span>
+        {lastReps !== undefined && <span className="set-last">{strings.lastTimeReps(lastReps)}</span>}
+      </div>
+    )
+  }
+
   return (
-    <div className={`set-row${bodyweight ? ' no-weight' : ''}${isCurrent || editing ? ' is-current' : ''}`}>
-      <span className="set-number">{strings.setLabel(setNumber)}</span>
-      {bodyweight ? null : (
-        <div className="field">
-          <label htmlFor={`w-${id}`}>
-            {strings.weight} ({strings.kg})
-          </label>
-          <input
-            id={`w-${id}`}
-            inputMode="decimal"
-            enterKeyHint="next"
-            autoComplete="off"
-            value={weight}
-            onFocus={(e) => e.currentTarget.select()}
-            onChange={(e) => {
-              setWeight(e.target.value)
-              setWeightTouched(true)
-            }}
-            onKeyDown={(e) => e.key === 'Enter' && repsRef.current?.focus()}
-          />
-        </div>
-      )}
-      <div className="field">
-        <label htmlFor={`r-${id}`}>{bodyweight ? `${strings.reps} · ${strings.bodyweight}` : strings.reps}</label>
-        <input
-          ref={repsRef}
-          id={`r-${id}`}
-          className="reps-input"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          enterKeyHint="done"
-          autoComplete="off"
-          value={reps}
-          onFocus={(e) => e.currentTarget.select()}
-          onChange={(e) => setReps(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && void save()}
-        />
+    <div className="set-row is-current is-counting">
+      <div className="set-head">
+        <span className="set-number">{strings.setLabel(setNumber)}</span>
+        {lastReps !== undefined && <span className="set-last">{strings.lastTimeReps(lastReps)}</span>}
       </div>
-      <div className="set-actions">
-        <button
-          type="button"
-          className={`btn${isCurrent || editing ? ' btn-primary' : ''}`}
-          onClick={() => void save()}
-        >
-          {strings.save}
-        </button>
-      </div>
+      <RepCounter
+        id={`r-${exercise.id}-${setNumber}`}
+        value={reps}
+        onChange={(v) => {
+          setReps(v)
+          setRepsTouched(true)
+          setError(null)
+        }}
+        onEnter={() => void save()}
+      />
+      <button type="button" className="btn btn-primary btn-save-set" onClick={() => void save()}>
+        {editing ? strings.save : strings.saveSet}
+      </button>
       {editing && saved && (
         <div className="set-edit-actions">
           <button type="button" className="btn btn-small" onClick={() => setEditing(false)}>

@@ -1,6 +1,6 @@
 // Which weight to pre-fill for a set that isn't logged yet, so between sets you only type reps.
 import type { Exercise } from '../db/types'
-import type { Progression } from './progression'
+import { TARGET_REPS, type Progression } from './progression'
 
 interface SetLike {
   setNumber: number
@@ -43,4 +43,27 @@ export function defaultWeight({ setNumber, todaysSets, last, flag, exercise }: I
   if (lastSet) return lastSet.weightKg!
 
   return exercise.startingWeightKg
+}
+
+/**
+ * The one weight for this exercise today (all 3 sets share it):
+ * the weight you already logged today, else what set 1 would get (suggestion → last time → starting weight).
+ */
+export function weightForToday({ todaysSets, last, flag, exercise }: Omit<Input, 'setNumber'>): number | undefined {
+  if (exercise.loadType === 'bodyweight') return undefined
+  const logged = todaysSets.filter((s) => s.weightKg !== null).sort((a, b) => b.setNumber - a.setNumber)[0]
+  if (logged) return logged.weightKg!
+  return defaultWeight({ setNumber: 1, todaysSets: [], last, flag, exercise })
+}
+
+/**
+ * Where the rep counter starts: what you did on this set last time (else last time's final set),
+ * so usually you only tap + or − once or twice. The very first time it starts at the target (10).
+ */
+export function defaultReps(setNumber: number, last?: { sets: { setNumber: number; reps: number }[] }): number {
+  const sets = last?.sets ?? []
+  const sameSet = sets.find((s) => s.setNumber === setNumber)
+  if (sameSet) return sameSet.reps
+  const lastSet = [...sets].sort((a, b) => b.setNumber - a.setNumber)[0]
+  return lastSet ? lastSet.reps : TARGET_REPS
 }

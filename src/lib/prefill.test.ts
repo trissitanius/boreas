@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { defaultWeight } from './prefill'
+import { defaultReps, defaultWeight, weightForToday } from './prefill'
 import type { LoadType } from '../db/types'
 
 const stack = { loadType: 'stack' as LoadType }
@@ -46,5 +46,43 @@ describe('defaultWeight', () => {
   it('never fills a weight for bodyweight exercises', () => {
     const bw = { loadType: 'bodyweight' as LoadType }
     expect(defaultWeight({ setNumber: 2, todaysSets: [set(1, null)], last: { sets: [set(1, null)] }, exercise: bw })).toBeUndefined()
+  })
+})
+
+describe('weightForToday', () => {
+  it("uses the weight you already logged today", () => {
+    expect(weightForToday({ todaysSets: [set(1, 32.5), set(2, 35)], last: lastSession, flag: increase, exercise: stack })).toBe(35)
+  })
+
+  it('before any set: the suggestion, else last time, else the starting weight', () => {
+    expect(weightForToday({ todaysSets: [], last: lastSession, flag: increase, exercise: stack })).toBe(16.5)
+    expect(weightForToday({ todaysSets: [], last: lastSession, exercise: stack })).toBe(30)
+    expect(weightForToday({ todaysSets: [], exercise: { ...stack, startingWeightKg: 25 } })).toBe(25)
+    expect(weightForToday({ todaysSets: [], exercise: stack })).toBeUndefined()
+  })
+
+  it('is empty for bodyweight exercises', () => {
+    const bw = { loadType: 'bodyweight' as LoadType }
+    expect(weightForToday({ todaysSets: [set(1, null)], exercise: bw })).toBeUndefined()
+  })
+})
+
+describe('defaultReps', () => {
+  const reps = (setNumber: number, r: number) => ({ setNumber, reps: r })
+  const last = { sets: [reps(1, 13), reps(2, 12), reps(3, 10)] }
+
+  it("starts at last time's reps for the same set", () => {
+    expect(defaultReps(1, last)).toBe(13)
+    expect(defaultReps(2, last)).toBe(12)
+    expect(defaultReps(3, last)).toBe(10)
+  })
+
+  it("falls back to last time's final set when that set is missing", () => {
+    expect(defaultReps(3, { sets: [reps(1, 11), reps(2, 9)] })).toBe(9)
+  })
+
+  it('starts at the target of 10 the first time', () => {
+    expect(defaultReps(1)).toBe(10)
+    expect(defaultReps(2, { sets: [] })).toBe(10)
   })
 })

@@ -1538,3 +1538,150 @@ section > .last-time {
 .trouble-likely::marker {
   color: var(--accent);
 }
+
+/* ---------- One weight field + rep counter ---------- */
+.weight-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+}
+
+.weight-row label {
+  display: grid;
+  gap: 2px;
+  font-weight: 700;
+  color: var(--soft);
+}
+
+.weight-hint {
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.weight-input {
+  width: 128px;
+  min-height: var(--tap-big);
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgb(var(--black-iris-rgb) / 0.9);
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-input:focus {
+  outline: 2px solid var(--soft);
+  outline-offset: 1px;
+}
+
+.weight-error {
+  margin: -4px 0 10px;
+}
+
+/* A set that isn't your turn yet: one quiet line */
+.set-row.is-upcoming {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  opacity: 0.6;
+}
+
+.set-last {
+  font-size: 0.9rem;
+  color: var(--soft);
+}
+
+/* The set you're on: the counter and a big Save button */
+.set-row.is-counting {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 14px;
+  margin: 0;
+}
+
+.set-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rep-counter {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) 84px;
+  align-items: center;
+  gap: 10px;
+}
+
+.rep-step {
+  height: 84px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--frozen-rgb) / 0.45);
+  background: rgb(var(--frozen-rgb) / 0.12);
+  font-size: 2.6rem;
+  font-weight: 600;
+  line-height: 1;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.rep-step:active {
+  background: rgb(var(--frozen-rgb) / 0.3);
+}
+
+.rep-step:disabled {
+  opacity: 0.35;
+}
+
+.rep-value {
+  display: grid;
+  justify-items: center;
+  cursor: text;
+}
+
+.rep-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 3.6rem;
+  font-weight: 800;
+  line-height: 1.05;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.rep-input:focus {
+  outline: 2px solid var(--soft);
+  outline-offset: 2px;
+}
+
+.rep-unit {
+  font-size: 0.85rem;
+  color: var(--soft);
+}
+
+.btn-save-set {
+  width: 100%;
+  min-height: var(--tap-big);
+  border-radius: 16px;
+  font-size: 1.15rem;
+}
+
+.set-row.is-counting .set-edit-actions,
+.set-row.is-counting .set-error {
+  grid-column: 1;
+}

@@ -10,6 +10,7 @@ import {
   getSetsForDay,
   LIMITS,
   logSet,
+  setWeightForToday,
   updateDayTemplate,
   updateExercise,
   updateSet,
@@ -384,5 +385,43 @@ describe('updateExercise muscles (muscle map)', () => {
     await expect(updateExercise(db, 'ex-chest-press', { primaryMuscles: [], secondaryMuscles: ['triceps'] })).rejects.toThrow()
     await expect(updateExercise(db, 'ex-chest-press', { primaryMuscles: ['wings' as never], secondaryMuscles: [] })).rejects.toThrow()
     expect((await db.exercises.get('ex-chest-press'))!.primaryMuscles).toEqual(['chest'])
+  })
+})
+
+describe('setWeightForToday', () => {
+  it("changes only this exercise's sets, only on this day", async () => {
+    await logThree('ex-dumbbell-curl', 'day-wed', WED, [[14, 13], [14, 12], [14, 10]])
+    await logThree('ex-dumbbell-curl', 'day-fri', FRI, [[14, 11], [14, 10]])
+    await logThree('ex-preacher-curl', 'day-fri', FRI, [[30, 12]])
+
+    const changed = await setWeightForToday(db, { exerciseId: 'ex-dumbbell-curl', dayTemplateId: 'day-fri', date: FRI, weightKg: 16 })
+    expect(changed).toBe(2)
+
+    const fri = await getSetsForDay(db, FRI, 'day-fri')
+    expect(fri.filter((s) => s.exerciseId === 'ex-dumbbell-curl').map((s) => s.weightKg)).toEqual([16, 16])
+    expect(fri.find((s) => s.exerciseId === 'ex-preacher-curl')?.weightKg).toBe(30)
+    const wed = await getSetsForDay(db, WED, 'day-wed')
+    expect(wed.map((s) => s.weightKg)).toEqual([14, 14, 14])
+  })
+
+  it('keeps the reps', async () => {
+    await logThree('ex-dumbbell-curl', 'day-fri', FRI, [[14, 13], [14, 12]])
+    await setWeightForToday(db, { exerciseId: 'ex-dumbbell-curl', dayTemplateId: 'day-fri', date: FRI, weightKg: 15 })
+    expect((await getSetsForDay(db, FRI, 'day-fri')).map((s) => s.reps)).toEqual([13, 12])
+  })
+
+  it('rejects an invalid weight and changes nothing', async () => {
+    await logThree('ex-dumbbell-curl', 'day-fri', FRI, [[14, 13]])
+    const base = { exerciseId: 'ex-dumbbell-curl', dayTemplateId: 'day-fri', date: FRI }
+    await expect(setWeightForToday(db, { ...base, weightKg: -1 })).rejects.toThrow()
+    await expect(setWeightForToday(db, { ...base, weightKg: Number.NaN })).rejects.toThrow()
+    expect((await getSetsForDay(db, FRI, 'day-fri'))[0].weightKg).toBe(14)
+  })
+
+  it('does nothing for bodyweight exercises or days without a session', async () => {
+    await logThree('ex-leg-raise', 'day-mon', WED, [[null, 15]])
+    expect(await setWeightForToday(db, { exerciseId: 'ex-leg-raise', dayTemplateId: 'day-mon', date: WED, weightKg: 10 })).toBe(0)
+    expect((await getSetsForDay(db, WED, 'day-mon'))[0].weightKg).toBeNull()
+    expect(await setWeightForToday(db, { exerciseId: 'ex-dumbbell-curl', dayTemplateId: 'day-fri', date: FRI, weightKg: 10 })).toBe(0)
   })
 })
