@@ -20,6 +20,28 @@ function errorText(e: unknown): string {
   return String(e)
 }
 
+/** Clues for why the browser offers no storage at all (usually a phone setting). */
+export function storageClues(win: {
+  WebAssembly?: unknown
+  navigator: { cookieEnabled?: boolean }
+  localStorage?: Storage
+}): { lockdownLikely: boolean; cookiesBlocked: boolean; localStorageWorks: boolean } {
+  let localStorageWorks = false
+  try {
+    win.localStorage?.setItem('boreas-probe', '1')
+    win.localStorage?.removeItem('boreas-probe')
+    localStorageWorks = win.localStorage !== undefined
+  } catch {
+    localStorageWorks = false
+  }
+  return {
+    // Lockdown Mode switches off WebAssembly (and other web features) in Safari.
+    lockdownLikely: typeof win.WebAssembly === 'undefined',
+    cookiesBlocked: win.navigator.cookieEnabled === false,
+    localStorageWorks,
+  }
+}
+
 /** Opens and removes a tiny throwaway database, straight through the browser (no Dexie). */
 function rawOpenProbe(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -41,6 +63,8 @@ function rawOpenProbe(): Promise<void> {
  */
 export function StorageTrouble() {
   const [results, setResults] = useState<Result[]>([])
+  const noStorage = typeof indexedDB === 'undefined' || indexedDB === null
+  const clues = storageClues(window as unknown as Parameters<typeof storageClues>[0])
 
   useEffect(() => {
     let cancelled = false
@@ -50,9 +74,14 @@ export function StorageTrouble() {
         out.push(r)
         if (!cancelled) setResults([...out])
       }
-      const hasIdb = typeof indexedDB !== 'undefined'
-      push({ label: t.checkAvailable, ok: hasIdb })
-      if (!hasIdb) return
+      const hasIdb = typeof indexedDB !== 'undefined' && indexedDB !== null
+      push({ label: t.checkAvailable, ok: hasIdb, detail: hasIdb ? undefined : `indexedDB = ${String(window.indexedDB)}` })
+      if (!hasIdb) {
+        push({ label: t.checkWebAssembly, ok: !clues.lockdownLikely })
+        push({ label: t.checkCookies, ok: !clues.cookiesBlocked })
+        push({ label: t.checkLocalStorage, ok: clues.localStorageWorks })
+        return
+      }
 
       if (indexedDB.databases) {
         try {
@@ -84,7 +113,22 @@ export function StorageTrouble() {
   return (
     <section className="storage-trouble">
       <h1 className="page-title day-editor-title">{t.title}</h1>
-      <p>{t.intro}</p>
+      {noStorage ? (
+        <div className="trouble-fix">
+          <p>{t.blockedIntro}</p>
+          <ol>
+            {clues.lockdownLikely && <li className="trouble-likely">{t.fixLockdown}</li>}
+            {clues.cookiesBlocked && <li className="trouble-likely">{t.fixCookies}</li>}
+            {!clues.lockdownLikely && <li>{t.fixLockdown}</li>}
+            {!clues.cookiesBlocked && <li>{t.fixCookies}</li>}
+            <li>{t.fixPrivate}</li>
+            <li>{t.fixScreenTime}</li>
+          </ol>
+          <p className="muted">{t.blockedAfter}</p>
+        </div>
+      ) : (
+        <p>{t.intro}</p>
+      )}
       <button type="button" className="btn btn-primary sheet-wide-button" onClick={() => location.reload()}>
         {t.tryAgain}
       </button>

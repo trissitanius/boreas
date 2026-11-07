@@ -26,7 +26,8 @@ export function App() {
   const [editingDay, setEditingDay] = useState(false)
   const [showBackup, setShowBackup] = useState(false)
   // If the data hasn't loaded after a few seconds, show checks and "Try again" instead of "Loading…" forever.
-  const [slowLoad, setSlowLoad] = useState(false)
+  // With no browser storage at all (a phone setting), show the help right away.
+  const [slowLoad, setSlowLoad] = useState(() => typeof indexedDB === 'undefined' || indexedDB === null)
 
   /** Opens an exercise (or goes back to the list with null), starting at the top of the screen. */
   function openExercise(id: string | null) {

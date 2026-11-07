@@ -1522,3 +1522,19 @@ section > .last-time {
   color: var(--soft);
   overflow-wrap: anywhere;
 }
+
+.trouble-fix ol {
+  margin: 0 0 12px;
+  padding-left: 22px;
+  display: grid;
+  gap: 8px;
+  line-height: 1.45;
+}
+
+.trouble-likely {
+  font-weight: 700;
+}
+
+.trouble-likely::marker {
+  color: var(--accent);
+}
