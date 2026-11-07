@@ -2,6 +2,7 @@ import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/theme.css'
 import { Backdrop } from './components/Backdrop'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { forceApp, isStandalone } from './lib/platform'
 import { listenForInstallPrompt } from './lib/installPrompt'
 import { requestPersistentStorage } from './lib/storage'
@@ -23,6 +24,8 @@ if (showApp) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Backdrop />
-    <Suspense fallback={null}>{showApp ? <App /> : <Landing />}</Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={null}>{showApp ? <App /> : <Landing />}</Suspense>
+    </ErrorBoundary>
   </StrictMode>,
 )

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from './db/db'
 import { getLastResult, getSetsForDay } from './db/repo'
@@ -16,6 +16,7 @@ import { NextUpCard } from './components/NextUpCard'
 import { DayEditor } from './components/DayEditor'
 import { BackupScreen, formatLastBackup } from './components/BackupScreen'
 import { needsBackupReminder } from './lib/backupReminder'
+import { StorageTrouble } from './components/StorageTrouble'
 
 export function App() {
   const { date: today, weekday: todayWeekday } = useToday()
@@ -24,6 +25,8 @@ export function App() {
   const [exerciseId, setExerciseId] = useState<string | null>(null)
   const [editingDay, setEditingDay] = useState(false)
   const [showBackup, setShowBackup] = useState(false)
+  // If the data hasn't loaded after a few seconds, show checks and "Try again" instead of "Loading…" forever.
+  const [slowLoad, setSlowLoad] = useState(false)
 
   /** Opens an exercise (or goes back to the list with null), starting at the top of the screen. */
   function openExercise(id: string | null) {
@@ -68,13 +71,22 @@ export function App() {
     return new Set(due.filter((id): id is string => id !== null))
   }, [data, template?.id, today])
 
+  const loaded = data !== undefined
+  useEffect(() => {
+    if (loaded) return
+    const id = window.setTimeout(() => setSlowLoad(true), 6000)
+    return () => window.clearTimeout(id)
+  }, [loaded])
+
   // For the gentle "back up" reminder.
   const backupInfo = useLiveQuery(async () => ({
     lastBackupAt: (await db.settings.get('app'))?.lastBackupAt,
     sessionCount: await db.sessions.count(),
   }))
 
-  if (!data || !template) return <main className="app muted">{strings.loading}</main>
+  if (!data || !template) {
+    return <main className="app">{slowLoad ? <StorageTrouble /> : <span className="muted">{strings.loading}</span>}</main>
+  }
 
   if (showBackup) {
     return (

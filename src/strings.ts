@@ -167,6 +167,25 @@ export const strings = {
     needPrimary: 'Paint at least one primary muscle (Ember).',
   },
 
+  // Shown when the data doesn't load (e.g. a browser storage problem)
+  storageTrouble: {
+    title: 'Can’t open your data',
+    intro: 'Boreas couldn’t open its storage on this phone. Your workouts are not deleted. Try again; if it keeps happening, send a screenshot of this screen.',
+    tryAgain: 'Try again',
+    checks: 'Checks',
+    checkAvailable: 'Browser storage is available',
+    checkList: 'Browser lists its databases',
+    checkOpenTest: 'A test database opens',
+    checkOpenBoreas: 'Boreas data opens',
+    timedOut: (s: number) => `no answer after ${s} s`,
+    mode: (safari14: boolean) => (safari14 ? 'Safari 14 mode' : 'normal mode'),
+    screenshot: 'Tip: a screenshot of this screen helps find the cause.',
+  },
+  crash: {
+    title: 'Something went wrong',
+    intro: 'This screen crashed. Your workouts are not deleted.',
+  },
+
   // Backup
   backup: {
     button: 'Backup',

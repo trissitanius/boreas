@@ -1491,3 +1491,34 @@ section > .last-time {
   color: var(--bg);
   font-weight: 700;
 }
+
+/* ---------- Storage trouble / crash screen ---------- */
+.storage-trouble p {
+  line-height: 1.45;
+}
+
+.trouble-checks {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.trouble-ok {
+  color: var(--soft);
+  font-weight: 900;
+}
+
+.trouble-bad {
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.trouble-detail {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--soft);
+  overflow-wrap: anywhere;
+}

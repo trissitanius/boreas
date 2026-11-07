@@ -1,6 +1,7 @@
-import Dexie, { type EntityTable } from 'dexie'
+import Dexie, { type DexieOptions, type EntityTable } from 'dexie'
 import type { AppSettings, DayTemplate, Exercise, Machine, Session, SetLog } from './types'
 import { buildSeed } from './seed'
+import { dexieOptions } from './idb'
 
 export class BoreasDB extends Dexie {
   machines!: EntityTable<Machine, 'id'>
@@ -10,8 +11,8 @@ export class BoreasDB extends Dexie {
   setLogs!: EntityTable<SetLog, 'id'>
   settings!: EntityTable<AppSettings, 'id'>
 
-  constructor(name = 'boreas') {
-    super(name)
+  constructor(name = 'boreas', options?: DexieOptions) {
+    super(name, options)
 
     // Only indexed fields are listed here; records can hold more.
     this.version(1).stores({
@@ -37,4 +38,4 @@ export class BoreasDB extends Dexie {
 }
 
 /** The app's one database. Tests create their own BoreasDB with a unique name instead. */
-export const db = new BoreasDB()
+export const db = new BoreasDB('boreas', dexieOptions())
