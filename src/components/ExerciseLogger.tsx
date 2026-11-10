@@ -106,7 +106,9 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
           </label>
           <input
             id={`w-${exercise.id}`}
-            className="weight-input"
+            className={`weight-input${weightError ? ' is-invalid' : ''}`}
+            placeholder="0"
+            aria-invalid={weightError ? true : undefined}
             inputMode="decimal"
             enterKeyHint="done"
             autoComplete="off"
@@ -136,6 +138,11 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
             saved={sets.find((s) => s.setNumber === n)}
             isCurrent={n === currentSet}
             weightKg={weightKg}
+            onWeightMissing={() => {
+              // Point at the weight field itself instead of a message far below it.
+              setWeightError(strings.invalidWeight)
+              document.getElementById(`w-${exercise.id}`)?.focus()
+            }}
             startReps={ready ? defaultReps(n, last ?? undefined) : undefined}
             lastReps={lastSet?.reps}
           />
@@ -180,13 +187,15 @@ interface SetRowProps {
   isCurrent: boolean
   /** The exercise's one weight for today (null = bodyweight, undefined = not valid yet). */
   weightKg: number | null | undefined
+  /** Called when a set can't be saved because the weight field is empty or wrong. */
+  onWeightMissing: () => void
   /** Where the rep counter starts (see lib/prefill.ts). */
   startReps?: number
   /** This set's reps last time, shown as a hint. */
   lastReps?: number
 }
 
-function SetRow({ setNumber, exercise, dayTemplateId, date, saved, isCurrent, weightKg, startReps, lastReps }: SetRowProps) {
+function SetRow({ setNumber, exercise, dayTemplateId, date, saved, isCurrent, weightKg, onWeightMissing, startReps, lastReps }: SetRowProps) {
   const [editing, setEditing] = useState(false)
   const [reps, setReps] = useState('')
   const [repsTouched, setRepsTouched] = useState(false)
@@ -222,7 +231,7 @@ function SetRow({ setNumber, exercise, dayTemplateId, date, saved, isCurrent, we
         setEditing(false)
         return
       }
-      if (weightKg === undefined) return setError(strings.invalidWeight)
+      if (weightKg === undefined) return onWeightMissing()
       setError(null)
       await logSet(db, { exerciseId: exercise.id, dayTemplateId, date, setNumber, weightKg, reps: repCount })
       // Keep every set of today on the same weight.

@@ -22,6 +22,7 @@ export const strings = {
   exerciseDone: '✓ Done',
   setCount: (logged: number, total: number) => `${logged}/${total}`,
   nextUp: 'Next up',
+  nextUpStart: 'Start →',
   lastTime: 'Last time',
   firstTime: 'First time — no history yet',
   allDone: 'All done for today',

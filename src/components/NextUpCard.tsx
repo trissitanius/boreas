@@ -36,6 +36,7 @@ export function NextUpCard({ exercise, machine, today, onOpen }: Props) {
         </span>
       </span>
       <LastTime exercise={exercise} today={today} />
+      <span className="next-up-start">{strings.nextUpStart}</span>
     </button>
   )
 }

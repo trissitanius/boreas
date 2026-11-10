@@ -1885,3 +1885,37 @@ section > .last-time {
 .rest-timer.is-over .rest-timer-clock {
   color: var(--accent);
 }
+
+/* Next up card: the one loud "start here" action on the today screen */
+.next-up-start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  margin-top: 12px;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.next-up:active .next-up-start {
+  filter: brightness(0.9);
+}
+
+/* Weight field: faint placeholder, and a clear mark when a weight is missing */
+.weight-input::placeholder {
+  color: rgb(var(--frozen-rgb) / 0.3);
+}
+
+.weight-input.is-invalid,
+.weight-input.is-invalid:focus {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.weight-error {
+  text-align: right;
+}
