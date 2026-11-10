@@ -54,6 +54,16 @@ export const strings = {
   removeRep: 'One rep less',
   sameWeightAllSets: 'Same for all 3 sets',
 
+  // Rest timer (between sets)
+  restTimer: {
+    label: 'Rest',
+    over: 'Rest over',
+    go: 'Go!',
+    add30: '+30 s',
+    skip: 'Skip',
+    dismiss: 'OK',
+  },
+
   editSettings: 'Edit',
   noSettings: 'No settings yet',
 

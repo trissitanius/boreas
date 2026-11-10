@@ -19,6 +19,7 @@ import { BackupScreen, formatLastBackup } from './components/BackupScreen'
 import { needsBackupReminder } from './lib/backupReminder'
 import { StorageTrouble } from './components/StorageTrouble'
 import { HistoryScreen } from './components/HistoryScreen'
+import { RestTimer } from './components/RestTimer'
 
 export function App() {
   const { date: today, weekday: todayWeekday } = useToday()
@@ -198,6 +199,7 @@ export function App() {
           onNext={() => openExercise(nextId ?? null)}
           onBack={() => openExercise(null)}
         />
+        <RestTimer />
       </main>
     )
   }
@@ -297,6 +299,7 @@ export function App() {
         today={dateWeekday}
         onSelect={(w) => setOtherWeekday(w === dateWeekday ? null : w)}
       />
+      <RestTimer />
     </main>
   )
 }

@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { db } from '../db/db'
 import { deleteSet, logSet, SETS_PER_EXERCISE, setWeightForToday, updateSet } from '../db/repo'
 import type { Exercise, Machine, SetLog } from '../db/types'
+import { toISODate } from '../lib/dates'
 import { formatNumber } from '../lib/format'
+import { startRest } from '../lib/restTimer'
 import { parseReps, parseWeight } from '../lib/parse'
 import { defaultReps, weightForToday } from '../lib/prefill'
 import { progression } from '../lib/progression'
@@ -224,6 +226,8 @@ function SetRow({ setNumber, exercise, dayTemplateId, date, saved, isCurrent, we
       setError(null)
       await logSet(db, { exerciseId: exercise.id, dayTemplateId, date, setNumber, weightKg, reps: repCount })
       // Keep every set of today on the same weight.
+      // Rest starts when the set is saved (not when filling in a past workout).
+      if (date === toISODate()) startRest()
       if (weightKg !== null) await setWeightForToday(db, { exerciseId: exercise.id, dayTemplateId, date, weightKg })
     } catch {
       setError(strings.saveFailed)
