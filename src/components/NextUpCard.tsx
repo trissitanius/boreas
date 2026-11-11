@@ -27,10 +27,10 @@ export function NextUpCard({ exercise, machine, today, onOpen }: Props) {
       <span className="section-label next-up-label">{strings.nextUp}</span>
       <span className="next-up-head">
         <span className={`gym-number next-up-number${gymNumber.length > 3 ? ' small' : ''}`}>{gymNumber}</span>
-        <span>
+        <span className="exercise-text">
           <span className="exercise-name">
             {exercise.name}
-            {exercise.variant && <span className="muted"> · {exercise.variant}</span>}
+            {exercise.variant && <span className="exercise-variant"> · {exercise.variant}</span>}
           </span>
           {exercise.settings && <span className="exercise-meta next-up-settings">{exercise.settings}</span>}
         </span>

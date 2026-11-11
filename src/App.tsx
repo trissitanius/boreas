@@ -20,6 +20,7 @@ import { needsBackupReminder } from './lib/backupReminder'
 import { StorageTrouble } from './components/StorageTrouble'
 import { HistoryScreen } from './components/HistoryScreen'
 import { RestTimer } from './components/RestTimer'
+import { BackupIcon, EditIcon, HistoryIcon } from './components/Icons'
 
 export function App() {
   const { date: today, weekday: todayWeekday } = useToday()
@@ -239,16 +240,21 @@ export function App() {
         </p>
       )}
 
-      {!rest && sets !== undefined && (
-        <NextUpCard
-          exercise={nextUp}
-          machine={nextUp?.machineId ? data.machines.get(nextUp.machineId) : undefined}
-          today={date}
-          onOpen={openExercise}
-        />
-      )}
+      {/* All done: the card sits on top. Otherwise "Next up" shows in its place in the list. */}
+      {!rest && sets !== undefined && !nextUp && <NextUpCard today={date} onOpen={openExercise} />}
 
       <ExerciseList
+        nextUpId={sets !== undefined ? nextUpId : undefined}
+        nextUpCard={
+          nextUp && (
+            <NextUpCard
+              exercise={nextUp}
+              machine={nextUp.machineId ? data.machines.get(nextUp.machineId) : undefined}
+              today={date}
+              onOpen={openExercise}
+            />
+          )
+        }
         template={day}
         exercises={data.exercises}
         machines={data.machines}
@@ -260,36 +266,24 @@ export function App() {
 
       {!isPast && (
         <div className="today-tools">
-          <button
-            type="button"
-            className="btn btn-small"
-            onClick={() => {
-              setShowHistory(true)
-              window.scrollTo(0, 0)
-            }}
-          >
-            {strings.history.button}
-          </button>
-          <button
-            type="button"
-            className="btn btn-small"
-            onClick={() => {
-              setEditingDay(true)
-              window.scrollTo(0, 0)
-            }}
-          >
-            {strings.dayEditor.editDay}
-          </button>
-          <button
-            type="button"
-            className="btn btn-small"
-            onClick={() => {
-              setShowBackup(true)
-              window.scrollTo(0, 0)
-            }}
-          >
-            {strings.backup.button}
-          </button>
+          {[
+            { label: strings.history.button, icon: <HistoryIcon />, open: () => setShowHistory(true) },
+            { label: strings.dayEditor.editDay, icon: <EditIcon />, open: () => setEditingDay(true) },
+            { label: strings.backup.button, icon: <BackupIcon />, open: () => setShowBackup(true) },
+          ].map((tool) => (
+            <button
+              key={tool.label}
+              type="button"
+              className="tool-button"
+              onClick={() => {
+                tool.open()
+                window.scrollTo(0, 0)
+              }}
+            >
+              {tool.icon}
+              {tool.label}
+            </button>
+          ))}
         </div>
       )}
 

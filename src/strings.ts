@@ -65,7 +65,8 @@ export const strings = {
     dismiss: 'OK',
   },
 
-  editSettings: 'Edit',
+  editSettings: 'Edit setup',
+  setup: 'Setup',
   noSettings: 'No settings yet',
 
   // Exercise editor (settings, cues, weight step)

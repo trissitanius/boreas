@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { DayTemplate, Exercise, Machine, SetLog } from '../db/types'
 import { SETS_PER_EXERCISE } from '../db/repo'
 import { exerciseStatus, isRestDay } from '../lib/schedule'
@@ -14,9 +15,12 @@ interface Props {
   /** Shown on rest days, e.g. "Next: Friday · Arms (tomorrow)". */
   nextWorkoutText?: string
   onOpen: (exerciseId: string) => void
+  /** The next exercise: shown in place as the big "Next up" card instead of a normal row. */
+  nextUpId?: string
+  nextUpCard?: ReactNode
 }
 
-export function ExerciseList({ template, exercises, machines, sets, flagged, nextWorkoutText, onOpen }: Props) {
+export function ExerciseList({ template, exercises, machines, sets, flagged, nextWorkoutText, onOpen, nextUpId, nextUpCard }: Props) {
   if (isRestDay(template)) {
     return (
       <section className="rest-day">
@@ -31,6 +35,7 @@ export function ExerciseList({ template, exercises, machines, sets, flagged, nex
       {template.exerciseIds.map((id) => {
         const exercise = exercises.get(id)
         if (!exercise) return null
+        if (id === nextUpId && nextUpCard) return <li key={id}>{nextUpCard}</li>
         const machine = exercise.machineId ? machines.get(exercise.machineId) : undefined
         const gymNumber = machine?.gymNumber ?? strings.noMachine
         const logged = exerciseStatus(sets, id)
@@ -44,13 +49,12 @@ export function ExerciseList({ template, exercises, machines, sets, flagged, nex
               onClick={() => onOpen(id)}
             >
               <span className={`gym-number${gymNumber.length > 3 ? ' small' : ''}`}>{gymNumber}</span>
-              <span>
+              <span className="exercise-text">
                 <span className="exercise-name">
                   {exercise.name}
-                  {exercise.variant && <span className="muted"> · {exercise.variant}</span>}
+                  {exercise.variant && <span className="exercise-variant"> · {exercise.variant}</span>}
                 </span>
-                <br />
-                <span className="exercise-meta">{exercise.settings}</span>
+                {exercise.settings && <span className="exercise-meta">{exercise.settings}</span>}
               </span>
               {(logged > 0 || due) && (
                 <span className="exercise-status">

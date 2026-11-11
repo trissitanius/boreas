@@ -11,6 +11,7 @@ import { progression } from '../lib/progression'
 import { useLastResult } from '../lib/useLastResult'
 import { strings } from '../strings'
 import { LastTime } from './LastTime'
+import { EditIcon } from './Icons'
 import { ExerciseEditor } from './ExerciseEditor'
 import { LazyBodyMap } from './LazyBodyMap'
 import { MuscleSheet } from './MuscleSheet'
@@ -72,21 +73,28 @@ export function ExerciseLogger({ exercise, machine, dayTemplateId, date, sets, n
         {strings.back}
       </button>
       <div className="logger-header">
-        <span className="gym-number">{machine?.gymNumber ?? strings.noMachine}</span>
-        <h2>
-          {exercise.name}
-          {exercise.variant && <span className="muted"> · {exercise.variant}</span>}
-        </h2>
+        <span className={`gym-number${(machine?.gymNumber ?? strings.noMachine).length > 3 ? ' small' : ''}`}>
+          {machine?.gymNumber ?? strings.noMachine}
+        </span>
+        <div className="logger-title">
+          <h2>
+            {exercise.name}
+            {exercise.variant && <span className="exercise-variant"> · {exercise.variant}</span>}
+          </h2>
+          {machine && (
+            <p className="machine-line">
+              {machine.brand} · {machine.model}
+            </p>
+          )}
+        </div>
       </div>
-      {machine && (
-        <p className="machine-line">
-          {machine.brand} · {machine.model}
-        </p>
-      )}
       <div className="settings-row">
-        <p className={`settings-line${exercise.settings ? '' : ' muted'}`}>{exercise.settings || strings.noSettings}</p>
-        <button type="button" className="btn btn-small" onClick={() => setEditorOpen(true)}>
-          {strings.editSettings}
+        <div className="settings-text">
+          <span className="card-label">{strings.setup}</span>
+          <p className={`settings-line${exercise.settings ? '' : ' muted'}`}>{exercise.settings || strings.noSettings}</p>
+        </div>
+        <button type="button" className="btn btn-small btn-ghost" onClick={() => setEditorOpen(true)} aria-label={strings.editSettings}>
+          <EditIcon />
         </button>
       </div>
       <LastTime exercise={exercise} today={date} />

@@ -1,0 +1,632 @@
+/* ==========================================================================
+   App UI polish: one set of sizes, corners and button styles for every screen.
+   Loaded after theme.css and scoped to the tracker (.app), so the welcome page
+   keeps its own look. Change the tokens here to restyle the whole app.
+   ========================================================================== */
+
+.app {
+  --r-sm: 10px; /* small controls: chips, icon buttons, small buttons */
+  --r-md: 14px; /* cards, inputs, normal buttons */
+  --r-lg: 20px; /* the big "Next up" card */
+  --gap: 10px; /* space between cards */
+  --pad: 16px; /* inside cards */
+  --tile: 56px; /* gym number tile in lists */
+  --surface-1: rgb(var(--black-iris-rgb) / 0.78);
+  --surface-2: rgb(var(--black-iris-rgb) / 0.9);
+  --raise: rgb(var(--frozen-rgb) / 0.07);
+  --line: rgb(var(--frozen-rgb) / 0.16);
+  --line-strong: rgb(var(--frozen-rgb) / 0.32);
+
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+/* ---------- Buttons: three kinds, same shape everywhere ---------- */
+.app .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 20px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--raise);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: background-color 0.12s, transform 0.12s;
+}
+
+.app .btn:active:not(:disabled) {
+  transform: scale(0.98);
+  background: rgb(var(--frozen-rgb) / 0.14);
+}
+
+.app .btn-primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 6px 20px -8px rgb(var(--ember-rgb) / 0.7);
+}
+
+.app .btn-primary:active:not(:disabled) {
+  background: var(--accent);
+  filter: brightness(0.92);
+}
+
+/* Disabled: neutral grey, never a muddy faded orange */
+.app .btn:disabled,
+.app .btn-primary:disabled {
+  opacity: 1;
+  border-color: var(--line);
+  background: rgb(var(--frozen-rgb) / 0.05);
+  color: rgb(var(--frozen-rgb) / 0.4);
+  box-shadow: none;
+  cursor: default;
+}
+
+.app .btn-small {
+  min-height: 40px;
+  min-width: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-sm);
+  font-size: 0.9rem;
+}
+
+.app .btn-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--soft);
+}
+
+.app .btn-small.btn-ghost {
+  padding: 0;
+  width: 44px;
+  min-height: 44px;
+}
+
+.app .icon {
+  flex-shrink: 0;
+}
+
+/* Back: a quiet text link that lines up with the page edge */
+.app .back-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0 0 4px -2px;
+  padding: 0 2px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--soft);
+}
+
+/* ---------- Cards: one surface style ---------- */
+.app .exercise-card,
+.app .history-card,
+.app .history-log-past,
+.app .backup-card,
+.app .weight-row,
+.app .muscle-panel,
+.app .edit-row,
+.app .picker-item,
+.app section > .last-time {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+}
+
+/* ---------- Gym number: a fixed square tile, so every row lines up ---------- */
+.app .exercise-card .gym-number,
+.app .next-up-number,
+.app .logger-header .gym-number,
+.app .edit-row .gym-number,
+.app .picker-item .gym-number {
+  display: grid;
+  place-items: center;
+  width: var(--tile);
+  height: var(--tile);
+  border-radius: 12px;
+  /* Solid underneath, so the glass background never shows through the number */
+  background: linear-gradient(rgb(var(--frozen-rgb) / 0.09), rgb(var(--frozen-rgb) / 0.09)), var(--bg);
+  box-shadow: inset 0 0 0 1px rgb(var(--frozen-rgb) / 0.14);
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.app .gym-number.small {
+  font-size: 0.95rem;
+  letter-spacing: 0;
+}
+
+/* ---------- Today: exercise list ---------- */
+.app .exercise-list {
+  gap: var(--gap);
+}
+
+.app .exercise-card {
+  grid-template-columns: var(--tile) minmax(0, 1fr) auto;
+  gap: 14px;
+  min-height: 0;
+  padding: 12px 14px 12px 12px;
+}
+
+.app .exercise-card:active {
+  background: var(--surface-2);
+}
+
+.app .exercise-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.app .exercise-name {
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.app .exercise-variant {
+  font-weight: 500;
+  color: var(--soft);
+}
+
+.app .exercise-meta {
+  font-size: 0.86rem;
+  line-height: 1.35;
+  color: rgb(var(--frozen-rgb) / 0.8);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.app .exercise-card.is-done {
+  opacity: 0.6;
+  border-color: var(--line);
+}
+
+.app .exercise-status {
+  font-size: 0.85rem;
+  color: var(--soft);
+}
+
+/* Next up: the same row, opened up, with the one Ember action */
+.app .next-up {
+  margin: 0;
+  padding: var(--pad);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background:
+    linear-gradient(180deg, rgb(var(--frozen-rgb) / 0.08), transparent 60%),
+    var(--surface-2);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.9);
+}
+
+.app .next-up .next-up-label {
+  margin: 0 0 12px;
+  color: var(--accent);
+}
+
+.app .next-up-head {
+  grid-template-columns: var(--tile) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.app .next-up-number {
+  min-width: 0;
+}
+
+.app .next-up .last-time {
+  min-height: 0;
+  margin-top: 14px;
+  border-radius: var(--r-sm);
+}
+
+.app .next-up-start {
+  min-height: 52px;
+  margin-top: 14px;
+  border-radius: var(--r-md);
+  box-shadow: 0 6px 20px -8px rgb(var(--ember-rgb) / 0.7);
+}
+
+.app .next-up-done {
+  margin-bottom: var(--gap);
+}
+
+/* Today's tools: three equal tiles */
+.app .today-tools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap);
+  margin-top: 24px;
+}
+
+.app .tool-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 72px;
+  padding: 10px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.app .tool-button .icon {
+  color: var(--soft);
+}
+
+.app .tool-button:active {
+  background: var(--surface-2);
+}
+
+/* Week strip: one clean row, one line per day */
+.app .other-days-grid {
+  gap: 6px;
+}
+
+.app .other-day {
+  min-height: 60px;
+  padding: 8px 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-1);
+  gap: 3px;
+}
+
+.app .other-day[aria-pressed='true'] {
+  border-color: var(--soft);
+  background: rgb(var(--frozen-rgb) / 0.16);
+  color: var(--text);
+}
+
+.app .other-day-label {
+  position: relative;
+  font-size: 0.85rem;
+}
+
+/* Today: a small dot under the day name instead of beside it */
+.app .other-day .is-today {
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  background: var(--accent);
+}
+
+.app .other-day-name {
+  width: 100%;
+  padding: 0 3px;
+  font-size: 0.68rem;
+  color: var(--soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app .section-label {
+  margin: 28px 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+/* ---------- Logging screen ---------- */
+.app .logger-header {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0 16px;
+}
+
+.app .logger-header .gym-number {
+  width: 64px;
+  height: 64px;
+  font-size: 1.9rem;
+  border-radius: var(--r-md);
+}
+
+.app .logger-header .gym-number.small {
+  font-size: 1.05rem;
+}
+
+.app .logger-title {
+  min-width: 0;
+}
+
+.app .logger-header h2 {
+  font-size: 1.4rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.app .machine-line {
+  margin: 3px 0 0;
+  font-size: 0.85rem;
+  color: rgb(var(--frozen-rgb) / 0.75);
+}
+
+.app .card-label,
+.app .last-time-label,
+.app .rest-timer-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.app .settings-row {
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--gap);
+  padding: 12px 6px 12px var(--pad);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+}
+
+.app .settings-text {
+  min-width: 0;
+}
+
+.app .settings-row .settings-line {
+  margin-top: 3px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.app section > .last-time,
+.app .settings-row + .last-time {
+  margin: 0 0 var(--gap);
+  padding: 12px var(--pad);
+}
+
+.app .cues {
+  margin: 0 0 var(--gap);
+}
+
+.app .cues li {
+  padding: 6px 12px;
+  border-color: var(--line);
+  background: var(--raise);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.app .weight-row {
+  margin: 0 0 var(--gap);
+  padding: 12px 12px 12px var(--pad);
+}
+
+.app .weight-row label {
+  color: var(--text);
+}
+
+.app .weight-hint {
+  color: var(--soft);
+}
+
+.app .weight-input {
+  width: 120px;
+  min-height: 60px;
+  border-color: var(--line-strong);
+  border-radius: var(--r-sm);
+}
+
+/* Sets: every state is a card with the same edges */
+.app .set-row,
+.app .set-row.is-logged,
+.app .set-row.is-upcoming,
+.app .set-row.is-counting {
+  margin: 0;
+  padding: 12px var(--pad);
+  border-radius: var(--r-md);
+}
+
+.app .set-row + .set-row {
+  margin-top: 8px;
+}
+
+.app .set-row.is-logged {
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 12px;
+  padding-right: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+}
+
+.app .set-check {
+  width: 26px;
+  height: 26px;
+  font-size: 0.85rem;
+}
+
+.app .set-result {
+  font-size: 1.2rem;
+}
+
+.app .set-row.is-logged .btn-small {
+  border-color: transparent;
+  background: transparent;
+  color: var(--soft);
+}
+
+.app .set-row.is-upcoming {
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  border: 1px dashed var(--line);
+  opacity: 1;
+  color: rgb(var(--frozen-rgb) / 0.6);
+}
+
+.app .set-row.is-upcoming .set-number {
+  color: inherit;
+}
+
+.app .set-row.is-counting {
+  gap: 14px;
+  padding: var(--pad);
+  background: var(--surface-2);
+  outline: none;
+  border: 1px solid var(--line-strong);
+}
+
+.app .set-number {
+  font-size: 0.95rem;
+}
+
+.app .rep-counter {
+  grid-template-columns: 76px minmax(0, 1fr) 76px;
+}
+
+.app .rep-step {
+  height: 76px;
+  border-color: var(--line-strong);
+  background: var(--raise);
+  font-size: 2.2rem;
+  font-weight: 400;
+}
+
+.app .btn-save-set,
+.app .btn-next {
+  min-height: 60px;
+  border-radius: var(--r-md);
+  font-size: 1.1rem;
+}
+
+.app .btn-next {
+  margin-top: 14px;
+}
+
+.app .muscle-panel {
+  margin-top: 24px;
+}
+
+/* ---------- Day editor ---------- */
+.app .edit-list {
+  gap: 8px;
+}
+
+.app .edit-row {
+  --tile: 44px;
+  grid-template-columns: var(--tile) minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 8px 8px 8px 10px;
+}
+
+.app .edit-row .gym-number {
+  font-size: 1.15rem;
+}
+
+.app .edit-row .gym-number.small {
+  font-size: 0.72rem;
+}
+
+.app .edit-name {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.app .edit-buttons {
+  gap: 2px;
+}
+
+.app .icon-btn {
+  width: 38px;
+  height: 44px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--soft);
+  font-size: 1.15rem;
+}
+
+.app .icon-btn:active:not(:disabled) {
+  background: var(--raise);
+}
+
+.app .icon-btn:disabled {
+  opacity: 0.2;
+}
+
+.app .add-exercise {
+  width: 100%;
+  border-style: dashed;
+  background: transparent;
+}
+
+.app .day-editor-actions,
+.app .sheet-actions {
+  gap: var(--gap);
+}
+
+.app .day-editor-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ---------- Backup + History ---------- */
+.app .backup-card,
+.app .history-log-past {
+  padding: var(--pad);
+}
+
+.app .backup-download {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  margin: var(--gap) 0 0;
+  border-radius: var(--r-md);
+}
+
+.app .sheet-wide-button {
+  width: 100%;
+}
+
+.app .history-card {
+  padding: 14px var(--pad);
+}
+
+.app .history-date {
+  min-height: 52px;
+  border-color: var(--line-strong);
+  border-radius: var(--r-md);
+}
+
+.app .history-log-row .btn {
+  min-height: 52px;
+}
+
+.app .past-banner {
+  border-radius: var(--r-md);
+}
+
+/* ---------- Rest timer ---------- */
+.app .rest-timer {
+  gap: 4px;
+  padding: 10px 8px 12px var(--pad);
+  border-color: var(--line-strong);
+  border-radius: var(--r-md);
+}
+
+.app .rest-timer .btn-small {
+  border-color: transparent;
+  background: var(--raise);
+}

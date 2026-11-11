@@ -1,6 +1,7 @@
 import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/theme.css'
+import './styles/ui.css'
 import { Backdrop } from './components/Backdrop'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { forceApp, isStandalone } from './lib/platform'
