@@ -266,13 +266,32 @@ export const strings = {
 
   // Welcome page (the website)
   landing: {
-    eyebrow: 'Workout tracker',
+    eyebrow: 'Open-source gym tracker',
     titleLines: ['Every set', 'remembered.'],
     lead: 'Boreas shows what you lifted last time on every exercise, whichever day you did it.',
     install: 'Install app',
     installed: 'Installed. Open Boreas from your home screen.',
-    note: 'Free. No account. Your workouts stay on your phone.',
+    note: 'Free and open source · No login · Works offline',
     tryInBrowser: 'Try it in the browser',
+    sourceCode: 'Source code',
+    featuresTitle: 'No login. No catch.',
+    features: [
+      {
+        title: 'No login',
+        text: 'Open it and start lifting. No email, no password, no account to create.',
+      },
+      {
+        title: 'Open source',
+        text: 'Every line of code is public on GitHub. Read it, check it, improve it.',
+      },
+      {
+        title: 'Your data stays on your phone',
+        text: 'Workouts are saved on your device, nowhere else. It works offline too, even in a basement gym.',
+      },
+    ],
+    viewOnGitHub: 'View the code on GitHub',
+    licenseLine: 'Boreas is free software under the GNU AGPL-3.0 licence.',
+    license: 'Licence',
   },
 
   // Install guide (iPhone and other browsers)

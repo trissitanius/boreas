@@ -1919,3 +1919,138 @@ section > .last-time {
 .weight-error {
   text-align: right;
 }
+
+/* ---------- Welcome page: open source + no login ---------- */
+/* The first screen (3D, headline, install) is its own block, so the 3D objects
+   stay in it while the sections below scroll in. */
+.landing {
+  display: block;
+}
+
+.landing-first {
+  position: relative;
+  min-height: calc(100dvh - 64px - env(safe-area-inset-top));
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.topbar-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.topbar-link:hover,
+.landing-footer a:hover {
+  color: var(--text);
+}
+
+/* On narrow phones the GitHub link is just the mark */
+@media (max-width: 400px) {
+  .topbar-link-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+.landing-features {
+  position: relative;
+  z-index: 2;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 56px 20px 24px;
+}
+
+.landing-features-title {
+  margin: 0 0 28px;
+  font-size: clamp(2rem, 9vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.feature-list {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 32px;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 720px) {
+  .feature-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.feature {
+  padding: 20px;
+  border: 1px solid rgb(var(--frozen-rgb) / 0.16);
+  border-radius: 18px;
+  background: rgb(var(--black-iris-rgb) / 0.78);
+}
+
+.feature-number {
+  display: block;
+  margin-bottom: 18px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.feature h3 {
+  margin: 0 0 6px;
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
+}
+
+.feature p {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--soft);
+}
+
+.github-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgb(var(--frozen-rgb) / 0.32);
+  background: rgb(var(--frozen-rgb) / 0.07);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.github-button .github-mark {
+  width: 22px;
+  height: 22px;
+}
+
+.landing-footer {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 20px calc(env(safe-area-inset-bottom) + 32px);
+  border-top: 1px solid rgb(var(--frozen-rgb) / 0.12);
+}
+
+.landing-footer p {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--soft);
+}
+
+.landing-footer a {
+  color: var(--soft);
+  text-underline-offset: 3px;
+}
