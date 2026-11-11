@@ -2054,3 +2054,39 @@ section > .last-time {
   color: var(--soft);
   text-underline-offset: 3px;
 }
+
+/* ---------- Welcome page: one centered frame on wide screens ---------- */
+/* Everything (top bar, headline, 3D, sections, footer) lines up on the same 1200px frame,
+   so the page reads as one centered composition on any monitor. On phones this is just 20px. */
+.landing {
+  --frame: 1200px;
+  --frame-pad: max(20px, calc((100% - var(--frame)) / 2 + 40px));
+}
+
+.topbar,
+.landing-hero,
+.landing-features,
+.landing-footer {
+  max-width: none;
+  padding-left: var(--frame-pad);
+  padding-right: var(--frame-pad);
+}
+
+@media (min-width: 900px) {
+  /* The 3D canvas is the frame itself, full height, so nothing is cut off at its bottom */
+  .hero-art {
+    inset: 0;
+    max-width: var(--frame);
+    margin: 0 auto;
+  }
+
+  /* Headline and text on the left half; the objects own the right half */
+  .landing-title {
+    font-size: clamp(4.5rem, 7.2vw, 7.5rem);
+  }
+
+  .landing-hero {
+    padding-top: 56px;
+    padding-bottom: 56px;
+  }
+}

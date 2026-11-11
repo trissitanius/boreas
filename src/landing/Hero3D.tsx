@@ -19,21 +19,45 @@ interface Pose {
 }
 
 /** Where the objects sit: stacked diagonally on phones, spread out on wide screens. */
-function layout(width: number, height: number): Record<keyof typeof SIZE, Pose> {
+export function layout(width: number, height: number): Record<keyof typeof SIZE, Pose> {
   const portrait = width / height < 0.85
   if (portrait) {
-    return {
-      plate: { x: 0.29 * width, y: 0.285 * height, size: 0.52 * width, rx: 0.32, ry: -0.5, rz: 0.1 },
-      kettlebell: { x: -0.22 * width, y: -0.09 * height, size: 0.42 * width, rx: 0.12, ry: 0.6, rz: 0.18 },
-      dumbbell: { x: 0.16 * width, y: -0.32 * height, size: 0.6 * width, rx: 0.45, ry: 0.75, rz: -0.32 },
-    }
+    // Phones: the objects fill the open space between the headline and the text below it,
+    // so the headline always stays readable.
+    return keepInside(width, height, {
+      plate: { x: 0.24 * width, y: 0.03 * height, size: 0.42 * width, rx: 0.32, ry: -0.5, rz: 0.1 },
+      kettlebell: { x: -0.25 * width, y: -0.13 * height, size: 0.34 * width, rx: 0.12, ry: 0.6, rz: 0.18 },
+      dumbbell: { x: 0.12 * width, y: -0.32 * height, size: 0.52 * width, rx: 0.45, ry: 0.75, rz: -0.32 },
+    })
   }
+  // Wide screens: the canvas is the centered page frame; the objects fill its right half,
+  // next to the headline on the left.
   const unit = Math.min(width, height * 1.6)
-  return {
-    plate: { x: 0.24 * width, y: 0.16 * height, size: 0.32 * unit, rx: 0.32, ry: -0.55, rz: 0.1 },
-    kettlebell: { x: 0.02 * width, y: -0.22 * height, size: 0.2 * unit, rx: 0.12, ry: 0.6, rz: 0.18 },
-    dumbbell: { x: 0.38 * width, y: -0.26 * height, size: 0.3 * unit, rx: 0.45, ry: 0.75, rz: -0.32 },
+  return keepInside(width, height, {
+    plate: { x: 0.27 * width, y: 0.2 * height, size: 0.3 * unit, rx: 0.32, ry: -0.55, rz: 0.1 },
+    kettlebell: { x: 0.06 * width, y: -0.2 * height, size: 0.19 * unit, rx: 0.12, ry: 0.6, rz: 0.18 },
+    dumbbell: { x: 0.34 * width, y: -0.2 * height, size: 0.28 * unit, rx: 0.45, ry: 0.75, rz: -0.32 },
+  })
+}
+
+/**
+ * Moves each object in just enough that all of it stays on the canvas (never cut off at an edge),
+ * whatever the screen shape. An object's size is its longest side, so half of it is the farthest
+ * it can reach from its centre in any rotation.
+ */
+function keepInside<T extends Record<string, Pose>>(width: number, height: number, poses: T): T {
+  const margin = 0.03 * Math.min(width, height) + 0.02 * height // edge gap + room for the gentle bobbing
+  const clamp = (v: number, limit: number) => Math.sign(v) * Math.min(Math.abs(v), Math.max(0, limit))
+  const out = {} as T
+  for (const [key, pose] of Object.entries(poses) as [keyof T, Pose][]) {
+    const reach = pose.size / 2
+    out[key] = {
+      ...pose,
+      x: clamp(pose.x, width / 2 - reach - margin),
+      y: clamp(pose.y, height / 2 - reach - margin),
+    } as T[keyof T]
   }
+  return out
 }
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - MathUtils.clamp(t, 0, 1), 3)
