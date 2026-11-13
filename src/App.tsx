@@ -108,12 +108,22 @@ export function App() {
   }))
 
   if (!data || !template) {
-    return <main className="app">{slowLoad ? <StorageTrouble /> : <span className="muted">{strings.loading}</span>}</main>
+    return (
+      <main className="app">
+        {slowLoad ? (
+          <StorageTrouble />
+        ) : (
+          <div className="splash" role="status" aria-label={strings.loading}>
+            <img src={`${import.meta.env.BASE_URL}logo-3d.webp`} alt="" width="120" height="120" />
+          </div>
+        )}
+      </main>
+    )
   }
 
   if (showHistory) {
     return (
-      <main className="app">
+      <main className="app" key="history">
         <HistoryScreen
           today={today}
           exercises={data.exercises}
@@ -133,7 +143,7 @@ export function App() {
 
   if (showBackup) {
     return (
-      <main className="app">
+      <main className="app" key="backup">
         <BackupScreen
           today={today}
           onClose={() => {
@@ -147,7 +157,7 @@ export function App() {
 
   if (editingDay) {
     return (
-      <main className="app">
+      <main className="app" key="day-editor">
         <DayEditor
           key={template.id}
           template={template}
@@ -187,7 +197,7 @@ export function App() {
       sets ?? [],
     )
     return (
-      <main className="app">
+      <main className="app" key={`exercise-${exercise.id}`}>
         {pastBanner}
         <ExerciseLogger
           key={exercise.id}
@@ -216,11 +226,12 @@ export function App() {
     : undefined
 
   return (
-    <main className="app">
+    <main className="app" key={`day-${date}-${weekday}`}>
       <TodayHeader
         kicker={isToday || isPast ? formatLongDate(date) : strings.weekdaysLong[weekday - 1]}
         title={rest ? strings.restDay : template.name}
         sub={rest ? undefined : strings.dayProgress(progress.done, progress.total)}
+        progress={rest ? undefined : progress}
       >
         {!isToday && !isPast && (
           <button type="button" className="back-button page-back" onClick={() => setOtherWeekday(null)}>

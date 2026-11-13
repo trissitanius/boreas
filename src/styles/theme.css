@@ -2090,3 +2090,288 @@ section > .last-time {
     padding-bottom: 56px;
   }
 }
+
+/* ---------- Brand font + logo ---------- */
+/* Archivo (SIL Open Font License, see public/fonts/OFL.txt). One file holds every weight and
+   width, and it is stored on the phone with the rest of the app, so it works offline. */
+@font-face {
+  font-family: 'Archivo';
+  src: url('/fonts/archivo-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font);
+}
+
+/* Headlines and big numbers: heavier and a little wider */
+.landing-title,
+.landing-features-title,
+.landing-cta-title,
+.page-title,
+.day-editor-title,
+.gym-number,
+.rep-input,
+.weight-input,
+.rest-timer-clock,
+.last-time-sets,
+.set-result {
+  font-family: var(--font);
+  font-stretch: 112%;
+  font-weight: 800;
+}
+
+.landing-title {
+  font-stretch: 116%;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+}
+
+.page-title {
+  letter-spacing: -0.025em;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-stretch: 118%;
+  letter-spacing: 0.26em;
+}
+
+.logo-mark {
+  flex-shrink: 0;
+}
+
+/* App start: the logo instead of a "Loading…" text. It only fades in if loading takes a moment. */
+.splash {
+  min-height: 70dvh;
+  display: grid;
+  place-items: center;
+}
+
+.splash img {
+  opacity: 0;
+  animation: splash-in 0.5s ease-out 0.25s forwards;
+}
+
+@keyframes splash-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Welcome page: closing call to action */
+.landing-cta {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px var(--frame-pad) 72px;
+  text-align: center;
+}
+
+.landing-cta-logo {
+  width: 168px;
+  height: 168px;
+  margin-bottom: 4px;
+}
+
+.landing-cta-title {
+  margin: 0 0 10px;
+  font-size: clamp(1.9rem, 7vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.landing-cta-text {
+  max-width: 34ch;
+  margin: 0 0 26px;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash img {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ---------- Sheets (pop-up panels): solid, so nothing behind shows through ---------- */
+:root {
+  --sheet-bg: #0e0e1d;
+}
+
+.sheet-overlay {
+  background: rgb(3 3 9 / 0.72);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: overlay-in 0.2s ease-out;
+}
+
+.sheet-panel {
+  padding-top: 10px;
+  border-color: rgb(var(--frozen-rgb) / 0.28);
+  border-radius: 26px 26px 0 0;
+  background: var(--sheet-bg);
+  box-shadow: 0 -24px 60px rgb(0 0 0 / 0.6);
+}
+
+/* Grab handle */
+.sheet-panel::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 0 auto 18px;
+  border-radius: 2px;
+  background: rgb(var(--frozen-rgb) / 0.3);
+}
+
+.sheet-title {
+  font-stretch: 108%;
+  letter-spacing: -0.01em;
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-overlay {
+    animation: none;
+  }
+}
+
+/* ---------- Welcome page: the app itself, in phone frames ---------- */
+.landing-showcase {
+  position: relative;
+  z-index: 2;
+  padding: 72px var(--frame-pad) 8px;
+}
+
+.screen-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 40px 56px;
+  max-width: 760px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.screen h3 {
+  margin: 22px 0 6px;
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
+}
+
+.screen p {
+  max-width: 32ch;
+  margin: 0;
+  line-height: 1.5;
+  color: var(--soft);
+}
+
+/* A plain phone: dark body, thin icy edge, soft glow underneath */
+.phone {
+  max-width: 300px;
+  padding: 9px;
+  border: 1px solid rgb(var(--frozen-rgb) / 0.3);
+  border-radius: 40px;
+  background: #05050c;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.6),
+    0 30px 70px -20px rgb(var(--deep-blue-rgb) / 0.7),
+    0 18px 40px -18px rgb(0 0 0 / 0.9);
+}
+
+.phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 31px;
+}
+
+/* Phones: swipe sideways between the screens */
+@media (max-width: 640px) {
+  .landing-showcase {
+    padding-top: 56px;
+  }
+
+  .screen-list {
+    display: flex;
+    gap: 20px;
+    max-width: none;
+    margin: 0 calc(var(--frame-pad) * -1);
+    padding: 0 var(--frame-pad) 28px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .screen-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .screen {
+    flex: 0 0 72%;
+    scroll-snap-align: center;
+  }
+}
+
+/* ---------- Welcome page: sizes tuned for the brand font ---------- */
+.landing-title {
+  font-size: clamp(2.3rem, 11vw, 4.6rem);
+}
+
+.landing-cta-logo {
+  width: 220px;
+  height: 220px;
+  margin-bottom: -8px;
+}
+
+@media (min-width: 900px) {
+  /* The headline keeps to the left half, clear of the 3D objects */
+  .landing-title {
+    font-size: clamp(3.6rem, 5.5vw, 5.4rem);
+  }
+
+  /* Showcase: headline on the left, the two phones on the right */
+  .landing-showcase {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 56px;
+    padding-top: 96px;
+  }
+
+  .landing-showcase .landing-features-title {
+    margin: 0;
+  }
+
+  .screen-list {
+    grid-template-columns: repeat(2, 280px);
+    gap: 48px;
+    max-width: none;
+  }
+
+  .landing-features {
+    padding-top: 96px;
+  }
+}

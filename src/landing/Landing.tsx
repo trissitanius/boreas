@@ -5,6 +5,7 @@ import { strings } from '../strings'
 import { InstallGuide } from './InstallGuide'
 import { hasWebGL } from '../lib/webgl'
 import { LICENSE_URL, REPO_URL } from '../lib/links'
+import { Wordmark } from '../components/Logo'
 
 /** GitHub's mark, drawn in the text color. */
 function GitHubMark() {
@@ -46,7 +47,7 @@ export function Landing() {
   return (
     <div className="landing">
       <header className="topbar">
-        <span className="wordmark">{strings.appName}</span>
+        <Wordmark />
         <nav className="topbar-links">
           <a className="topbar-link" href={REPO_URL} target="_blank" rel="noopener">
             <GitHubMark />
@@ -91,6 +92,29 @@ export function Landing() {
       </main>
       </div>
 
+      <section className="landing-showcase" aria-labelledby="showcase-title">
+        <h2 id="showcase-title" className="landing-features-title">
+          {t.showcaseTitle}
+        </h2>
+        <ul className="screen-list">
+          {t.screens.map((screen) => (
+            <li key={screen.image} className="screen">
+              <div className="phone">
+                <img
+                  src={`${import.meta.env.BASE_URL}${screen.image}`}
+                  alt={screen.alt}
+                  width="390"
+                  height="844"
+                  loading="lazy"
+                />
+              </div>
+              <h3>{screen.title}</h3>
+              <p>{screen.text}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section className="landing-features" aria-labelledby="features-title">
         <h2 id="features-title" className="landing-features-title">
           {t.featuresTitle}
@@ -112,8 +136,21 @@ export function Landing() {
         </a>
       </section>
 
+      <section className="landing-cta">
+        <img className="landing-cta-logo" src={`${import.meta.env.BASE_URL}logo-3d.webp`} alt="" width="192" height="192" loading="lazy" />
+        <h2 className="landing-cta-title">{t.ctaTitle}</h2>
+        <p className="landing-cta-text">{t.ctaText}</p>
+        {installed ? (
+          <p className="landing-installed">{t.installed}</p>
+        ) : (
+          <button type="button" className="btn btn-primary btn-large" onClick={() => void onInstall()}>
+            {t.install}
+          </button>
+        )}
+      </section>
+
       <footer className="landing-footer">
-        <span className="wordmark">{strings.appName}</span>
+        <Wordmark />
         <p>
           {t.licenseLine}{' '}
           <a href={LICENSE_URL} target="_blank" rel="noopener">

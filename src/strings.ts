@@ -274,6 +274,21 @@ export const strings = {
     note: 'Free and open source · No login · Works offline',
     tryInBrowser: 'Try it in the browser',
     sourceCode: 'Source code',
+    showcaseTitle: 'Built for the gym floor.',
+    screens: [
+      {
+        image: 'screens/today.webp',
+        alt: 'The Boreas today screen: the next exercise with last time’s weight and reps, and the rest of the day’s exercises.',
+        title: 'Today at a glance',
+        text: 'Open the app and your workout is there, with what you lifted last time and when it’s time to add weight.',
+      },
+      {
+        image: 'screens/logger.webp',
+        alt: 'The Boreas logging screen: machine settings, last time’s result, the weight, and a big rep counter.',
+        title: 'Log a set in seconds',
+        text: 'The weight is already filled in. Count your reps, tap Save, and the rest timer starts.',
+      },
+    ],
     featuresTitle: 'No login. No catch.',
     features: [
       {
@@ -290,6 +305,8 @@ export const strings = {
       },
     ],
     viewOnGitHub: 'View the code on GitHub',
+    ctaTitle: 'Ready for your next set?',
+    ctaText: 'Install Boreas in a few seconds. No sign-up, nothing to pay.',
     licenseLine: 'Boreas is free software under the GNU AGPL-3.0 licence.',
     license: 'Licence',
   },

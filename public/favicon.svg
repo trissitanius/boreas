@@ -1,11 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Boreas mark: three gusts of the north wind (Frozen) and a spark (Ember) on Black Iris.
-       Everything stays inside the central safe circle, so the same art works as a maskable icon. -->
-  <rect width="512" height="512" fill="#080813"/>
-  <g transform="translate(-14 -10)" fill="none" stroke="#A0BDDB" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M112 196 H300 A52 52 0 1 0 248 144"/>
-    <path d="M112 268 H372"/>
-    <path d="M112 340 H268 A48 48 0 1 1 220 388"/>
+  <!-- Boreas mark, flat version for small sizes: a weight plate (Frozen ring) with an Ember core,
+       carried by three streaks of north wind. The app icons are the 3D render of the same mark
+       (see tools/render-icons.ts). -->
+  <defs>
+    <linearGradient id="wind" gradientUnits="userSpaceOnUse" x1="30" y1="0" x2="190" y2="0">
+      <stop offset="0" stop-color="#A0BDDB" stop-opacity="0"/>
+      <stop offset="0.7" stop-color="#A0BDDB"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#080813"/>
+  <g fill="none" stroke="url(#wind)" stroke-width="30" stroke-linecap="round">
+    <path d="M84 180 H186"/>
+    <path d="M36 256 H164"/>
+    <path d="M108 332 H186"/>
   </g>
-  <circle cx="412" cy="258" r="22" fill="#FF7A45"/>
+  <circle cx="326" cy="256" r="134" fill="none" stroke="#A0BDDB" stroke-width="32"/>
+  <circle cx="326" cy="256" r="64" fill="none" stroke="#A0BDDB" stroke-opacity="0.45" stroke-width="12"/>
+  <circle cx="326" cy="256" r="30" fill="#FF7A45"/>
 </svg>

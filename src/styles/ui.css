@@ -630,3 +630,148 @@
   border-color: transparent;
   background: var(--raise);
 }
+
+/* ---------- Day progress: one segment per exercise ---------- */
+.app .day-progress {
+  display: flex;
+  gap: 5px;
+  max-width: 260px;
+  margin-top: 12px;
+}
+
+.app .day-progress span {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: rgb(var(--frozen-rgb) / 0.22);
+  transition: background-color 0.3s;
+}
+
+.app .day-progress span.is-done {
+  background: var(--soft);
+}
+
+.app .day-progress.is-complete span {
+  background: var(--accent);
+}
+
+/* ---------- Motion: small and quick, off when the phone asks for less motion ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* Each screen eases in */
+  main.app {
+    animation: screen-in 0.22s ease-out;
+  }
+
+  /* A just-saved set: the tick pops */
+  .app .set-row.is-logged .set-check {
+    animation: tick-pop 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+
+  .app .rest-timer {
+    animation: timer-up 0.25s ease-out;
+  }
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes tick-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+@keyframes timer-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* Typography details with the brand font */
+.app .btn,
+.app .tool-button,
+.app .exercise-name,
+.app .logger-header h2 {
+  font-stretch: 105%;
+}
+
+.app .page-kicker,
+.app .page-sub {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.app .section-label,
+.app .card-label,
+.app .last-time-label,
+.app .rest-timer-label {
+  font-stretch: 110%;
+}
+
+/* ---------- Forms and pickers inside sheets ---------- */
+.app .form-field input,
+.app .form-field textarea,
+.app .cue-add input,
+.app .picker-search,
+.app .form-select {
+  border-color: var(--line-strong);
+  border-radius: var(--r-md);
+  background: rgb(var(--frozen-rgb) / 0.05);
+}
+
+.app .form-field label,
+.app .form-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.app .cue-edit-list li {
+  border-color: var(--line);
+  border-radius: var(--r-md);
+  background: var(--raise);
+}
+
+.app .chip {
+  border-color: var(--line-strong);
+  background: transparent;
+  font-weight: 600;
+}
+
+.app .picker-list {
+  gap: 8px;
+}
+
+.app .picker-item {
+  --tile: 44px;
+  grid-template-columns: var(--tile) minmax(0, 1fr) auto;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 14px 8px 8px;
+  background: var(--raise);
+}
+
+.app .picker-item .gym-number {
+  font-size: 1.15rem;
+}
+
+.app .picker-item .gym-number.small {
+  font-size: 0.72rem;
+}
+
+.app .picker-new {
+  width: 100%;
+  border-style: dashed;
+  background: transparent;
+}
+
+/* The rest timer is solid, so the page never shows through it */
+.app .rest-timer {
+  background: var(--sheet-bg);
+}

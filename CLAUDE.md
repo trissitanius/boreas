@@ -93,6 +93,11 @@ Use an open-source body-map component instead of drawing one, e.g. `react-body-h
 
 Rule: two soft colors and one loud one. The accent is used sparingly: the "Increase weight" badge, the primary button, and the primary muscles on the muscle map. Secondary muscles use Frozen. Define all colors as CSS variables so the palette is easy to swap.
 
+### Logo and font
+- **Logo:** a weight plate carried by three streaks of north wind, with an Ember core. The app icons are a 3D render of the plate model (`tools/render-icons.ts`, saved with `node tools/render-icons.mjs`); the flat version for small sizes is `public/favicon.svg` and `src/components/Logo.tsx`. Keep the two in sync.
+- **Font:** Archivo (SIL Open Font License), one variable file in `public/fonts/`, stored offline with the app. Headlines and big numbers use it heavier and slightly wider.
+- **Welcome-page screenshots:** `public/screens/*.webp` are real app screens, made with `node tools/render-screens.mjs`. Re-run it when the app's look changes.
+
 ### Fluted glass effect
 I want a **"fluted glass" / "reeded glass"** look: a large, soft, blurred colored shape behind a layer of thin vertical ribs, like looking through textured glass.
 - Build it with CSS only (e.g. a blurred gradient blob behind a container of narrow vertical strips, each with `backdrop-filter: blur()` and a subtle repeating highlight; or a `repeating-linear-gradient` overlay). No image files.

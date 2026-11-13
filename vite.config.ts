@@ -21,7 +21,7 @@ export default defineConfig({
       manifest: {
         name: 'Boreas',
         short_name: 'Boreas',
-        description: 'Workout tracker that always shows your last result for every exercise.',
+        description: 'Open-source gym tracker with no login. Always shows what you lifted last time.',
         lang: 'en',
         start_url: BASE_PATH,
         scope: BASE_PATH,
@@ -36,7 +36,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2,webmanifest}'],
         navigateFallback: `${BASE_PATH}index.html`,
         cleanupOutdatedCaches: true,
       },
